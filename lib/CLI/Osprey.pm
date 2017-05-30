@@ -2,6 +2,7 @@ package CLI::Osprey;
 use strict;
 use warnings;
 
+# ABSTRACT: MooX::Options + MooX::Cmd + Sanity
 # VERSION
 # AUTHORITY
 
