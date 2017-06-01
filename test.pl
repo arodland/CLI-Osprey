@@ -8,7 +8,18 @@ option opt => (
   format => 's',
 );
 
+sub run {
+  warn "foo\n";
+}
+
 subcommand bar => 'Foo::Bar';
+
+subcommand baz => sub {
+  my ($self, @args) = @_;
+  use Data::Dumper;
+  warn "inline ", Dumper(\@_);
+};
+
 no Moo;
 
 package Foo::Bar;
@@ -20,6 +31,10 @@ option opt => (
   format => 's',
 );
 
+sub run {
+  warn "bar\n";
+}
+
 package main;
 use Data::Dumper;
 
@@ -27,4 +42,6 @@ use Data::Dumper;
 #print Dumper({ Foo->_osprey_options });
 #print Dumper({ Foo->_osprey_subcommands });
 
-print Dumper(Foo->new_with_options);
+my $obj = Foo->new_with_options;
+print Dumper($obj);
+print Dumper($obj->run);

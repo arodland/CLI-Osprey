@@ -3,6 +3,7 @@ use strict;
 use warnings;
 use Carp 'croak';
 use Getopt::Long::Descriptive;
+use CLI::Osprey::InlineSubcommand ();
 
 sub _osprey_option_to_getopt {
   my ($name, %attributes) = @_;
@@ -147,7 +148,12 @@ sub new_with_options {
   if (%subcommands && @ARGV) {
     $subcommand_name = shift @ARGV; # Remove it so the subcommand sees only options
     $subcommand_class = $subcommands{$subcommand_name};
-    if (!defined $subcommand_class) {
+    if (ref $subcommand_class eq 'CODE') {
+      $subcommand_class = CLI::Osprey::InlineSubcommand->new(
+        name => $subcommand_name,
+        method => $subcommand_class,
+      );
+    } elsif (!defined $subcommand_class) {
       croak "Unknown subcommand $ARGV[0] (available: ". join(", ", sort keys %subcommands)  .")";
     }
   }
@@ -215,6 +221,11 @@ sub parse_options {
 
   for my $name (keys %options) {
     $params{$name} = $opt->$name();
+  }
+
+  for my $name (qw(h help man)) {
+    my $val = $opt->$name();
+    $params{$name} = $val if defined $val;
   }
 
   return \%params, $usage;

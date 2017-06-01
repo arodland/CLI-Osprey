@@ -87,8 +87,9 @@ sub import {
 
   my $subcommand = sub {
     my ($name, $module) = @_;
+    use_module($module) unless ref($module) eq 'CODE';
 
-    $subcommands->{$name} = use_module($module);
+    $subcommands->{$name} = $module;
     push @{$SUBCOMMAND{$module}}, { parent => $target, name => $name };
     $apply_modifiers->();
   };
