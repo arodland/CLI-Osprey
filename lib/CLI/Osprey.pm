@@ -49,6 +49,8 @@ sub import {
   }
 
   my $osprey_config = {
+    preserve_argv => 1,
+    abbreviate => 1,
     @import_options,
   };
 
@@ -77,7 +79,7 @@ sub import {
     my ($name, %attributes) = @_;
 
     $has->($name => _non_option_attributes(%attributes));
-    $options_data->{$name} = _option_attributes(%attributes);
+    $options_data->{$name} = _option_attributes($name, %attributes);
     $apply_modifiers->();
   };
 
@@ -115,13 +117,15 @@ sub _non_option_attributes {
 }
 
 {
-  my $order = 0;
+  my $added_order = 0;
 
   sub _option_attributes {
-    my (%attributes) = @_;
+    my ($name, %attributes) = @_;
 
-    $attributes{order} = ++$order unless defined $attributes{order};
+    $attributes{added_order} = ++$added_order;
     $attributes{format} .= "@" if $attributes{repeatable} && defined $attributes{format} && $attributes{format} !~ /\@$/;
+    $attributes{option} = $name unless defined $attributes{option};
+    return \%attributes;
   }
 }
 
