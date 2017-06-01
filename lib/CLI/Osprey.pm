@@ -7,11 +7,13 @@ use warnings;
 # AUTHORITY
 
 use Carp 'croak';
-use Sub::Quote 'quote_sub';
+use Module::Runtime 'use_module';
 
 my @OPTIONS_ATTRIBUTES = qw(
   option_name format short repeatable negativable doc long_doc order hidden
 );
+
+our %SUBCOMMAND;
 
 sub import {
   my (undef, @import_options) = @_;
@@ -85,7 +87,9 @@ sub import {
 
   my $subcommand = sub {
     my ($name, $module) = @_;
-    $subcommands->{$name} = $module;
+
+    $subcommands->{$name} = use_module($module);
+    push @{$SUBCOMMAND{$module}}, { parent => $target, name => $name };
     $apply_modifiers->();
   };
 

@@ -2,6 +2,7 @@ package CLI::Osprey::Role;
 use strict;
 use warnings;
 use Carp 'croak';
+use Getopt::Long::Descriptive;
 
 sub _osprey_option_to_getopt {
   my ($name, %attributes) = @_;
@@ -114,21 +115,122 @@ use Moo::Role;
 
 requires qw(_osprey_config _osprey_options _osprey_subcommands);
 
+has 'parent_command' => (
+  is => 'ro',
+);
+
 sub new_with_options {
-  # placeholder
+  my ($class, %params) = @_;
+  my %config = $class->_osprey_config;
+
+  local @ARGV = @ARGV if $config{protect_argv};
+
+  my ($parsed_params, $usage) = $class->parse_options(%params);
+
+  if ($parsed_params->{h}) {
+    return $class->osprey_usage(1, $usage);
+  } elsif ($parsed_params->{help}) {
+    return $class->osprey_help(1, $usage);
+  } elsif ($parsed_params->{man}) {
+    return $class->osprey_man($usage);
+  }
+
+  my %merged_params;
+  if ($config{prefer_commandline}) {
+    %merged_params = (%$parsed_params, %params);
+  } else {
+    %merged_params = (%params, %$parsed_params);
+  }
+
+  my %subcommands = $class->_osprey_subcommands;
+  my ($subcommand_name, $subcommand_class);
+  if (%subcommands && @ARGV) {
+    $subcommand_name = shift @ARGV; # Remove it so the subcommand sees only options
+    $subcommand_class = $subcommands{$subcommand_name};
+    if (!defined $subcommand_class) {
+      croak "Unknown subcommand $ARGV[0] (available: ". join(", ", sort keys %subcommands)  .")";
+    }
+  }
+
+  my $self;
+  unless (eval { $self = $class->new(%merged_params); 1 }) {
+    if ($@ =~ /^Attribute \((.*?)\) is required/) {
+      print STDERR "$1 is missing\n";
+    } elsif ($@ =~ /^Missing required arguments: (.*) at /) {
+      my @missing_required = split /,\s/, $1;
+      print STDERR "$_ is missing\n" for @missing_required;
+    } elsif ($@ =~ /^(.*?) required/) {
+      print STDERR "$1 is missing\n";
+    } elsif ($@ =~ /^isa check .*?failed: /) {
+      print STDERR substr($@, index($@, ':') + 2);
+    } else {
+      print STDERR $@;
+    }
+    return $class->options_usage(1, $usage);
+  }
+
+  if ($subcommand_class) {
+    return $subcommand_class->new_with_options(%params, parent_command => $self);
+  } else {
+    return $self;
+  }
 }
 
 sub parse_options {
-  my ($class, %params) = @_;
+  my ($class) = @_;
 
   my %options = $class->_osprey_options;
   my %config = $class->_osprey_config;
 
   my ($options, $abbreviations) = _osprey_prepare_options(\%options, \%config);
-  local @ARGV = @ARGV if $config{protect_argv};
   @ARGV = _osprey_fix_argv(\%options, $abbreviations);
 
-  return @ARGV;
+  my @getopt_options = qw(require_order);
+
+  push @getopt_options, @{$config{getopt_options}} if defined $config{getopt_options};
+
+  my $prog_name = $class->_osprey_prog_name;
+
+  my $usage_str = $config{usage_string};
+  $usage_str = "USAGE: $prog_name %o" unless defined $usage_str;
+
+  my ($opt, $usage) = describe_options(
+    $usage_str,
+    @$options,
+    [],
+    [ 'h', "show a short help message" ],
+    [ 'help', "show a long help message" ],
+    [ 'man', "show the manual" ],
+    { getopt_conf => \@getopt_options },
+  );
+
+  $usage->{prog_name} = $prog_name;
+  $usage->{target} = $class;
+
+  if ($usage->{should_die}) {
+    return $class->osprey_usage(1, $usage);
+  }
+
+  my %params;
+
+  for my $name (keys %options) {
+    $params{$name} = $opt->$name();
+  }
+
+  return \%params, $usage;
+
+}
+
+sub _osprey_prog_name {
+  my ($class) = @_;
+
+  if (my $info = $Osprey::CLI::SUBCOMMAND{$class}) {
+    my ($parent, $name) = @{$info->[0]}[qw(parent name)];
+    return $parent->_osprey_prog_name . " " . $name;
+  } else {
+    # Top level command: let GLD figure out the command name
+    return Getopt::Long::Descriptive::prog_name();
+  }
 }
 
 1;
