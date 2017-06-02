@@ -227,11 +227,7 @@ sub parse_options {
 
   my %parsed_params;
 
-  for my $name (keys %options) {
-    $parsed_params{$name} = $opt->$name();
-  }
-
-  for my $name (qw(h help man)) {
+  for my $name (keys %options, qw(h help man)) {
     my $val = $opt->$name();
     $parsed_params{$name} = $val if defined $val;
   }
