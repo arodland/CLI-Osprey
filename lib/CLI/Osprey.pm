@@ -132,3 +132,14 @@ sub _option_attributes {
 }
 
 1;
+__END__
+
+=head1 THANKS
+
+This module is based heavily on code from L<MooX::Options> and takes strong
+inspiration from L<MooX::Cmd> and L<MooX::Options::Actions>. Thanks to
+celogeek, Jens Reshack, Getty, Tom Bloor, and all contributors to those
+modules. Thanks to mst for prodding me to do this. Thanks Grinnz for helping
+me update my dzillage.
+
+=cut
