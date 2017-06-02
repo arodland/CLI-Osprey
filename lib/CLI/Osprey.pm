@@ -77,11 +77,13 @@ sub import {
     });
   };
 
+  my $added_order = 0;
+
   my $option = sub {
     my ($name, %attributes) = @_;
 
     $has->($name => _non_option_attributes(%attributes));
-    $options_data->{$name} = _option_attributes($name, %attributes);
+    $options_data->{$name} = _option_attributes($name, added_order => ++$added_order, %attributes);
     $apply_modifiers->();
   };
 
@@ -121,17 +123,12 @@ sub _non_option_attributes {
   } keys %attributes;
 }
 
-{
-  my $added_order = 0;
+sub _option_attributes {
+  my ($name, %attributes) = @_;
 
-  sub _option_attributes {
-    my ($name, %attributes) = @_;
-
-    $attributes{added_order} = ++$added_order;
-    $attributes{format} .= "@" if $attributes{repeatable} && defined $attributes{format} && $attributes{format} !~ /\@$/;
-    $attributes{option} = $name unless defined $attributes{option};
-    return \%attributes;
-  }
+  $attributes{format} .= "@" if $attributes{repeatable} && defined $attributes{format} && $attributes{format} !~ /\@$/;
+  $attributes{option} = $name unless defined $attributes{option};
+  return \%attributes;
 }
 
 1;
