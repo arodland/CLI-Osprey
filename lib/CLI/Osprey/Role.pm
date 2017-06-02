@@ -23,8 +23,8 @@ sub _osprey_prepare_options {
   my %fullnames;
 
   my @order = sort {
-    $options->{$a}{order} <=> $options->{$b}{order}
-    || ($config->{added_order} ? $options->{$a}{added_order} <=> $options->{$b}{added_order} : 0)
+    ($options->{$a}{order} || 9999) <=> ($options->{$b}{order} || 9999)
+    || ($config->{added_order} ? ($options->{$a}{added_order} <=> $options->{$b}{added_order}) : 0)
     || $a cmp $b
   } keys %$options;
 
