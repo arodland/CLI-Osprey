@@ -10,7 +10,7 @@ use Carp 'croak';
 use Module::Runtime 'use_module';
 
 my @OPTIONS_ATTRIBUTES = qw(
-  option_name format short repeatable negativable doc long_doc order hidden
+  option option_name format short repeatable negativable doc long_doc order hidden
 );
 
 sub import {
@@ -123,9 +123,12 @@ sub _non_option_attributes {
 sub _option_attributes {
   my ($name, %attributes) = @_;
 
-  $attributes{format} .= "@" if $attributes{repeatable} && defined $attributes{format} && $attributes{format} !~ /\@$/;
   $attributes{option} = $name unless defined $attributes{option};
-  return \%attributes;
+  my $ret = {};
+  for (@OPTIONS_ATTRIBUTES) {
+    $ret->{$_} = $attributes{$_} if exists $attributes{$_};
+  }
+  return $ret;
 }
 
 1;
