@@ -3,6 +3,10 @@ use strict;
 use warnings;
 use Moo;
 
+# ABSTRACT: A class to wrap coderef subcommands
+# VERSION
+# AUTHORITY
+
 has 'name' => (
   is => 'ro',
   required => 1,
