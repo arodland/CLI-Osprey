@@ -159,17 +159,25 @@ sub new_with_options {
 
   my %subcommands = $class->_osprey_subcommands;
   my ($subcommand_name, $subcommand_class);
-  if (%subcommands && @ARGV) {
-    $subcommand_name = shift @ARGV; # Remove it so the subcommand sees only options
-    $subcommand_class = $subcommands{$subcommand_name};
-    if (ref $subcommand_class eq 'CODE') {
-      $subcommand_class = CLI::Osprey::InlineSubcommand->new(
-        name => $subcommand_name,
-        method => $subcommand_class,
-      );
-    } elsif (!defined $subcommand_class) {
-      croak "Unknown subcommand $ARGV[0] (available: ". join(", ", sort keys %subcommands)  .")";
+  if (@ARGV && $ARGV[0] ne '--') { # Check what to do with remaining options
+    if ($ARGV[0] =~ /^--/) { # Getopt stopped at an unrecognized option, error.
+      print STDERR "Unknown option '$ARGV[0]'.\n";
+      return $class->osprey_usage(1, $usage);
+    } elsif (%subcommands) {
+      $subcommand_name = shift @ARGV; # Remove it so the subcommand sees only options
+      $subcommand_class = $subcommands{$subcommand_name};
+      if (ref $subcommand_class eq 'CODE') {
+        $subcommand_class = CLI::Osprey::InlineSubcommand->new(
+          name => $subcommand_name,
+          method => $subcommand_class,
+        );
+      } elsif (!defined $subcommand_class) {
+        print STDERR "Unknown subcommand '$subcommand_name'.\n";
+        return $class->osprey_usage(1, $usage);
+      }
     }
+    # If we're not expecting a subcommand, and getopt didn't stop at an option, consider the remainder
+    # as positional args and leave them in ARGV.
   }
 
   my $self;
@@ -186,7 +194,7 @@ sub new_with_options {
     } else {
       print STDERR $@;
     }
-    return $class->options_usage(1, $usage);
+    return $class->osprey_usage(1, $usage);
   }
 
   if ($subcommand_class) {
@@ -210,6 +218,7 @@ sub parse_options {
   push @getopt_options, @{$config{getopt_options}} if defined $config{getopt_options};
 
   my $prog_name = $params{invoked_as};
+  $prog_name = Getopt::Long::Descriptive::prog_name() if !defined $prog_name;
 
   my $usage_str = $config{usage_string};
   $usage_str = "USAGE: $prog_name %o" unless defined $usage_str;
