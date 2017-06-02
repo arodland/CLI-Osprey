@@ -54,7 +54,7 @@ sub _osprey_prepare_options {
     $doc = "no documentation for $name" unless defined $doc;
 
     push @getopt, [] if $attributes{spacer_before};
-    push @getopt, [ _osprey_option_to_getopt($name, %attributes), $doc, ($attributes{hidden} ? { hidden => 1} : ()) ];
+    push @getopt, [ _osprey_option_to_getopt($option, %attributes), $doc, ($attributes{hidden} ? { hidden => 1} : ()) ];
     push @getopt, [] if $attributes{spacer_after};
 
     push @{ $abbreviations{$name} }, $option;
