@@ -2,8 +2,14 @@ package CLI::Osprey::Role;
 use strict;
 use warnings;
 use Carp 'croak';
-use Getopt::Long::Descriptive;
+use Path::Tiny ();
+
+use CLI::Osprey::Descriptive;
 use CLI::Osprey::InlineSubcommand ();
+
+# ABSTRACT: Role for CLI::Osprey applications
+# VERSION
+# AUTHORITY
 
 sub _osprey_option_to_getopt {
   my ($name, %attributes) = @_;
@@ -234,6 +240,73 @@ sub parse_options {
 
   return \%parsed_params, $usage;
 
+}
+
+sub osprey_usage {
+  my ($class, $code, @messages) = @_;
+
+  my $usage;
+
+  if (@messages && ref($messages[0]) eq 'CLI::Osprey::Descriptive::Usage') {
+    $usage = shift @messages;
+  } else {
+    local @ARGV = ();
+    (undef, $usage) = $class->parse_options(help => 1);
+  }
+
+  my $message;
+  $message = join("\n", @messages, '') if @messages;
+  $message .= $usage . "\n";
+
+  if ($code) {
+    CORE::warn $message;
+  } else {
+    print $message;
+  }
+  exit $code if defined $code;
+  return;
+}
+
+sub osprey_help {
+  my ($class, $code, $usage) = @_;
+
+  if (!defined $usage || ref($usage) ne 'CLI::Osprey::Descriptive::Usage') {
+    local @ARGV = ();
+    (undef, $usage) = $class->parse_options(help => 1);
+  }
+
+  my $message = $usage->option_help . "\n";
+
+  if ($code) {
+    CORE::warn $message;
+  } else {
+    print $message;
+  }
+  exit $code if defined $code;
+  return;
+}
+
+sub osprey_man {
+  my ($class, $usage, $output) = @_;
+
+  if (!defined $usage || ref($usage) ne 'CLI::Osprey::Descriptive::Usage') {
+    local @ARGV = ();
+    (undef, $usage) = $class->parse_options(man => 1);
+  }
+
+  my $tmpdir = Path::Tiny->tmpdir;
+  my $podfile = $tmpdir->child("help.pod");
+  $podfile->spew_utf8($usage->osprey_pod);
+
+  require Pod::Usage;
+  Pod::Usage::pod2usage(
+    -verbose => 2,
+    -input => "$podfile",
+    -exitval => 'NOEXIT',
+    -output => $output,
+  );
+
+  exit(0);
 }
 
 1;
