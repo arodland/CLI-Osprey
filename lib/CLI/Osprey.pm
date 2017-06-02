@@ -13,8 +13,6 @@ my @OPTIONS_ATTRIBUTES = qw(
   option_name format short repeatable negativable doc long_doc order hidden
 );
 
-our %SUBCOMMAND;
-
 sub import {
   my (undef, @import_options) = @_;
   my $target = caller;
@@ -92,7 +90,6 @@ sub import {
     use_module($module) unless ref($module) eq 'CODE';
 
     $subcommands->{$name} = $module;
-    push @{$SUBCOMMAND{$module}}, { parent => $target, name => $name };
     $apply_modifiers->();
   };
 

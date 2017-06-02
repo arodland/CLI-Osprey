@@ -120,11 +120,19 @@ has 'parent_command' => (
   is => 'ro',
 );
 
+has 'invoked_as' => (
+  is => 'ro',
+);
+
 sub new_with_options {
   my ($class, %params) = @_;
   my %config = $class->_osprey_config;
 
   local @ARGV = @ARGV if $config{protect_argv};
+
+  if (!defined $params{invoked_as}) {
+    $params{invoked_as} = Getopt::Long::Descriptive::prog_name();
+  }
 
   my ($parsed_params, $usage) = $class->parse_options(%params);
 
@@ -176,14 +184,14 @@ sub new_with_options {
   }
 
   if ($subcommand_class) {
-    return $subcommand_class->new_with_options(%params, parent_command => $self);
+    return $subcommand_class->new_with_options(%params, parent_command => $self, invoked_as => "$params{invoked_as} $subcommand_name");
   } else {
     return $self;
   }
 }
 
 sub parse_options {
-  my ($class) = @_;
+  my ($class, %params) = @_;
 
   my %options = $class->_osprey_options;
   my %config = $class->_osprey_config;
@@ -195,7 +203,7 @@ sub parse_options {
 
   push @getopt_options, @{$config{getopt_options}} if defined $config{getopt_options};
 
-  my $prog_name = $class->_osprey_prog_name;
+  my $prog_name = $params{invoked_as};
 
   my $usage_str = $config{usage_string};
   $usage_str = "USAGE: $prog_name %o" unless defined $usage_str;
@@ -217,31 +225,19 @@ sub parse_options {
     return $class->osprey_usage(1, $usage);
   }
 
-  my %params;
+  my %parsed_params;
 
   for my $name (keys %options) {
-    $params{$name} = $opt->$name();
+    $parsed_params{$name} = $opt->$name();
   }
 
   for my $name (qw(h help man)) {
     my $val = $opt->$name();
-    $params{$name} = $val if defined $val;
+    $parsed_params{$name} = $val if defined $val;
   }
 
-  return \%params, $usage;
+  return \%parsed_params, $usage;
 
-}
-
-sub _osprey_prog_name {
-  my ($class) = @_;
-
-  if (my $info = $Osprey::CLI::SUBCOMMAND{$class}) {
-    my ($parent, $name) = @{$info->[0]}[qw(parent name)];
-    return $parent->_osprey_prog_name . " " . $name;
-  } else {
-    # Top level command: let GLD figure out the command name
-    return Getopt::Long::Descriptive::prog_name();
-  }
 }
 
 1;
