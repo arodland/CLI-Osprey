@@ -136,6 +136,183 @@ sub _option_attributes {
 1;
 __END__
 
+=head1 SYNOPSIS
+
+in Hello.pm
+
+    package Hello;
+    use Moo;
+    use CLI::Osprey;
+
+    option 'message' => (
+        is => 'ro',
+        format => 's',
+        doc => 'The message to display',
+        default => 'Hello world!',
+    );
+
+    sub run {
+        my ($self) = @_;
+        print $self->message, "\n";
+    }
+
+In hello.pl
+
+    use Hello;
+    Hello->new_with_options->run;
+
+=head1 DESCRIPTION
+
+CLI::Osprey is a module to assist in writing commandline applications with M*
+OO modules (Moose, Moo, Mo). With it, you structure your app as one or more
+modules, which get instantiated with the commandline arguments as attributes.
+Arguments are parsed using L<Getopt::Long::Descriptive>, and both long and
+short help messages as well as complete manual pages are automatically
+generated. An app can be a single command with options, or have sub-commands
+(like C<git>). Sub-commands can be defined as modules (with options of their
+own) or as simple coderefs.
+
+=head2 Differences from MooX::Options
+
+Osprey is deliberately similar to L<MooX::Options>, and porting an app that
+uses MooX::Options to Osprey should be fairly simple in most cases. However
+there are a few important differences:
+
+=over 4
+
+=item *
+
+Osprey is pure-perl, without any mandatory XS dependencies, meaning it can be
+used in fatpacked scripts, and other situations where you may need to run on
+diverse machines, where a C compiler and control over the ennvironment aren't
+guaranteed.
+
+=item *
+
+Osprey's support for sub-commands is built-in from the beginning. We think this
+makes for a better experience than MooX::Options + MooX::Cmd.
+
+=item *
+
+While MooX::Options requires an option's primary name to be the same as the
+attribute that holds it, and MooX::Cmd derives a sub-command's name from the
+name of the module that implements it, Osprey separates these, so that Perl
+identifier naming conventions don't dictate your command line interface.
+
+=item *
+
+Osprey doesn't use an automatic module finder (like L<Module::Pluggable>) to
+locate modules for sub-commands; their names are given explicitly. This small
+amount of additional typing gives you more control and less fragility.
+
+=back
+
+There are also a few things MooX::Options has that Osprey lacks. While they may
+be added in the future, I haven't seen the need yet. Currently known missing
+feeatures are JSON options, C<autosplit>, C<autorange>, and C<config_from_file>
+support.
+
+=head1 IMPORTED METHODS
+
+The following methods, will be imported into a class that uses CLI::Osprey:
+
+=head2 new_with_options
+
+Parses commandline arguments, validates them, and calls the C<new> method with
+the resulting parameters. Any parameters passed to C<new_with_options> will
+also be passed to C<new>; the C<prefer_commandline> import option controls
+which overrides which.
+
+=head2 option
+
+The C<option> keyword acts like C<has> (and accepts all of the arguments that
+C<has> does), but also registers the attribute as a commandline option. See
+L</OPTION PARAMETERS> for usage.
+
+=head2 osprey_usage($code, @messages)
+
+Displays a short usage message, the same as if the app was invoked with the
+C<-h> option. Also displays the lines of text in C<@messages> if any are
+passed. If C<$code> is passed a defined value, exits with that as a status.
+
+=head2 osprey_help($code)
+
+Displays a more substantial usage message, the same as if the app was invoked
+with the C<--help> option. If C<$code> is passed a defined value, exits with
+that as a status.
+
+=head2 osprey_man
+
+Displays a manual page for the app, containing long descriptive text (if
+provided) about each command and option, then exits.
+
+=begin comment
+
+osprey_man has parameters, the first one is for internal usage only and the
+second one is obscure... just ignore them until I sort it out.
+
+=end comment
+
+=head1 IMPORT PARAMETERS
+
+The parameters to C<use CLI::Osprey> serve two roles: to customize Osprey's
+behavior, and to provide information about the app and its options for use in
+the usage messages. They are:
+
+=head2 abbreviate
+
+Default: true.
+
+If C<abbreviate> is set to a true value, then long options can be abbreviated to
+the point of uniqueness. That is, C<--long-option-name> can be called as
+C<--lon> as long as there are no other options starting with those letters. An
+option can always be called by its full name, even if it is a prefix of some
+longer option's name. If C<abbreviate> is false, options must always be called
+by their full names (or by a defined short name).
+
+=head2 added_order
+
+Default: true.
+
+If C<added_order> is set to a true value, then two options with the same
+C<order> (or none at all) will appear in the help text in the same order as
+their C<option> keywords were executed. If it is false, they will appear in
+alphabetical order instead.
+
+=head2 getopt_options
+
+Default: C<['require_order']>.
+
+Contains a list of options to control option parsing behavior (see
+L<Getopt::Long/"Configuring Getopt::Long">). Note, however, that many of these
+are not helpful with Osprey, and that using C<permute> will likely break
+subcommands entirely. MooX::Options calls this parameter C<flavour>.
+
+=head2 prefer_commandline
+
+Default: false.
+
+If true, command-line options override key/value pairs passed to
+C<new_with_options>. If false, the reverse is true.
+
+=head2 protect_argv
+
+Default: false.
+
+If true, the C<@ARGV> array will be localized for the duration of
+C<new_with_options>, and will be left in the same state after option parsing as
+it was before. If false, the C<@ARGV> array will be modified by option parsing,
+removing any recognized options, values, and subcommands, and leaving behind
+any positional parameters or anything after and including a C<--> separator.
+
+=head2 usage_string
+
+Default: C<"USAGE: $program_name %o">
+
+Provides the header of the usage message printed in response to the C<-h>
+option or an error in option processing. The format of the string is described
+in L<Getopt::Long::Descriptive/"$usage_desc">.
+
 =head1 THANKS
 
 This module is based heavily on code from L<MooX::Options> and takes strong
