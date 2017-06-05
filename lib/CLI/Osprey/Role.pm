@@ -210,11 +210,12 @@ sub parse_options {
 
   my %options = $class->_osprey_options;
   my %config = $class->_osprey_config;
+  my %subcommands = $class->_osprey_subcommands;
 
   my ($options, $abbreviations) = _osprey_prepare_options(\%options, \%config);
   @ARGV = _osprey_fix_argv(\%options, $abbreviations);
 
-  my @getopt_options = qw(require_order);
+  my @getopt_options = %subcommands ? qw(require_order) : ();
 
   push @getopt_options, @{$config{getopt_options}} if defined $config{getopt_options};
 
