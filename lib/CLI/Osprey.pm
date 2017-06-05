@@ -123,7 +123,9 @@ sub _non_option_attributes {
 sub _option_attributes {
   my ($name, %attributes) = @_;
 
-  $attributes{option} = $name unless defined $attributes{option};
+  unless (defined $attributes{option}) {
+    ($attributes{option} = $name) =~ tr/_/-/;
+  }
   my $ret = {};
   for (@OPTIONS_ATTRIBUTES) {
     $ret->{$_} = $attributes{$_} if exists $attributes{$_};
