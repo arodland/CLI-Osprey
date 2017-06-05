@@ -3,6 +3,7 @@ use strict;
 use warnings;
 use Carp 'croak';
 use Path::Tiny ();
+use Scalar::Util qw(blessed reftype);
 
 use CLI::Osprey::Descriptive;
 use CLI::Osprey::InlineSubcommand ();
@@ -166,7 +167,7 @@ sub new_with_options {
     } elsif (%subcommands) {
       $subcommand_name = shift @ARGV; # Remove it so the subcommand sees only options
       $subcommand_class = $subcommands{$subcommand_name};
-      if (ref $subcommand_class eq 'CODE') {
+      if (blessed($subcommand_class) eq 'CODE') {
         $subcommand_class = CLI::Osprey::InlineSubcommand->new(
           name => $subcommand_name,
           method => $subcommand_class,
@@ -256,7 +257,7 @@ sub osprey_usage {
 
   my $usage;
 
-  if (@messages && ref($messages[0]) eq 'CLI::Osprey::Descriptive::Usage') {
+  if (@messages && blessed($messages[0]) && $messages[0]->isa('CLI::Osprey::Descriptive::Usage')) {
     $usage = shift @messages;
   } else {
     local @ARGV = ();
@@ -279,7 +280,7 @@ sub osprey_usage {
 sub osprey_help {
   my ($class, $code, $usage) = @_;
 
-  if (!defined $usage || ref($usage) ne 'CLI::Osprey::Descriptive::Usage') {
+  unless (defined $usage && blessed($usage) && $usage->isa('CLI::Osprey::Descriptive::Usage')) {
     local @ARGV = ();
     (undef, $usage) = $class->parse_options(help => 1);
   }
@@ -298,7 +299,7 @@ sub osprey_help {
 sub osprey_man {
   my ($class, $usage, $output) = @_;
 
-  if (!defined $usage || ref($usage) ne 'CLI::Osprey::Descriptive::Usage') {
+  unless (defined $usage && blessed($usage) && $usage->isa('CLI::Osprey::Descriptive::Usage')) {
     local @ARGV = ();
     (undef, $usage) = $class->parse_options(man => 1);
   }
