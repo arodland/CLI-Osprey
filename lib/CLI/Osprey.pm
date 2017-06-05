@@ -10,7 +10,7 @@ use Carp 'croak';
 use Module::Runtime 'use_module';
 
 my @OPTIONS_ATTRIBUTES = qw(
-  option option_name format short repeatable negativable doc long_doc order hidden
+  option option_name format short repeatable negativable spacer_before spacer_after doc long_doc order hidden
 );
 
 sub import {
