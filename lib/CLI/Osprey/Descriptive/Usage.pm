@@ -55,14 +55,16 @@ sub describe_opt {
     return '';
   }
 
-  my $name = $opt->{name};
+  my $name = my $attr_name = $opt->{name};
 
   my $option_attrs;
 
   if ($self->has_target) {
     my %options = $self->target->_osprey_options;
-    $option_attrs = $options{$name};
+    $option_attrs = $options{$attr_name};
+    $name = $option_attrs->{option} if defined $option_attrs->{option};
   }
+
 
   my ($short, $format) = $opt->{spec} =~ /(?:\|(\w))?(?:=(.*?))?$/;
 
