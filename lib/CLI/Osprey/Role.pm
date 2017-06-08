@@ -167,7 +167,7 @@ sub new_with_options {
     } elsif (%subcommands) {
       $subcommand_name = shift @ARGV; # Remove it so the subcommand sees only options
       $subcommand_class = $subcommands{$subcommand_name};
-      if (blessed($subcommand_class) eq 'CODE') {
+      if (ref($subcommand_class) && reftype($subcommand_class) eq 'CODE') {
         $subcommand_class = CLI::Osprey::InlineSubcommand->new(
           name => $subcommand_name,
           method => $subcommand_class,
