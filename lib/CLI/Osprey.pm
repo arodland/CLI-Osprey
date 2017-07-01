@@ -210,8 +210,26 @@ amount of additional typing gives you more control and less fragility.
 
 There are also a few things MooX::Options has that Osprey lacks. While they may
 be added in the future, I haven't seen the need yet. Currently known missing
-feeatures are JSON options, C<autosplit>, C<autorange>, and C<config_from_file>
-support.
+feeatures are JSON options, C<config_from_file> support, C<autosplit>, and C<autorange>.
+
+For JSON support, you can use a coercion on the attribute, turning it from a
+string to a ref via C<decode_json>.
+
+To default an app's options from a config file, you may want to do something
+like this in your script file:
+
+    use JSON 'decode_json';
+    use Path::Tiny;
+
+    MyApp->new_with_options(
+        map decode_json(path($_)->slurp),
+        grep -f,
+        "$ENV{HOME}/.myapprc"
+    )->run;
+
+Provided that C<prefer_commandline> is true (which is the default), any
+options in C<.myapprc> will be used as defaults if that file exists, but will
+still be overrideable from the commandline.
 
 =head1 IMPORTED METHODS
 
