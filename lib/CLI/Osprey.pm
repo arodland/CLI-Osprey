@@ -51,6 +51,7 @@ sub import {
   my $osprey_config = {
     preserve_argv => 1,
     abbreviate => 1,
+    prefer_commandline => 1,
     @import_options,
   };
 
@@ -290,7 +291,7 @@ subcommands entirely. MooX::Options calls this parameter C<flavour>.
 
 =head2 prefer_commandline
 
-Default: false.
+Default: true.
 
 If true, command-line options override key/value pairs passed to
 C<new_with_options>. If false, the reverse is true.
