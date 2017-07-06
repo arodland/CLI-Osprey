@@ -311,7 +311,7 @@ sub osprey_man {
     (undef, $usage) = $class->parse_options(man => 1);
   }
 
-  my $tmpdir = Path::Tiny->tmpdir;
+  my $tmpdir = Path::Tiny->tempdir;
   my $podfile = $tmpdir->child("help.pod");
   $podfile->spew_utf8($usage->osprey_pod);
 
