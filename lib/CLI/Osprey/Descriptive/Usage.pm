@@ -43,7 +43,7 @@ has 'width' => (
   is => 'ro',
   default => sub {
     return $ENV{CLI_OSPREY_OVERRIDE_WIDTH} if exists $ENV{CLI_OSPREY_OVERRIDE_WIDTH};
-    return $ENV{COLS} if exists $ENV{COLS};
+    return $ENV{COLUMNS} if exists $ENV{COLUMNS};
     return 80;
   },
 );
