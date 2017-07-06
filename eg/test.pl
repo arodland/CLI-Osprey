@@ -18,13 +18,14 @@ subcommand baz => sub {
   my ($self, @args) = @_;
   use Data::Dumper;
   warn "inline ", Dumper(\@_);
-};
+}, doc => "baz luhrmann";
 
 no Moo;
 
 package Foo::Bar;
 use Moo;
-use CLI::Osprey;
+use CLI::Osprey
+  doc => "bars the foos";
 
 option opt => (
   is => 'ro',

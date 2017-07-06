@@ -12,6 +12,11 @@ has 'name' => (
   required => 1,
 );
 
+has 'doc' => (
+  is => 'bare',
+  reader => '_osprey_subcommand_doc',
+);
+
 has 'method' => (
   is => 'ro',
   required => 1,

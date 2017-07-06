@@ -93,10 +93,15 @@ sub sub_commands_text {
       push @out, "Subcommands available:";
 
       for my $name (sort keys %subcommands) {
-        push @out, $self->wrap(
-          sprintf("%*s  %s", -$maxlen, $name, "TODO: description"),
-          " " x ($maxlen + 2)
-        );
+        my $desc = $subcommands{$name}->can('_osprey_subcommand_doc') && $subcommands{$name}->_osprey_subcommand_doc;
+        if (defined $desc) {
+          push @out, $self->wrap(
+            sprintf("%*s  %s", -$maxlen, $name, $subcommands{$name}->_osprey_subcommand_doc),
+            " " x ($maxlen + 2)
+          );
+        } else {
+          push @out, $name;
+        }
       }
       push @out, "";
 
