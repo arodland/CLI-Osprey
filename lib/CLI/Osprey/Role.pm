@@ -223,7 +223,13 @@ sub parse_options {
   $prog_name = Getopt::Long::Descriptive::prog_name() if !defined $prog_name;
 
   my $usage_str = $config{usage_string};
-  $usage_str = "USAGE: $prog_name %o" unless defined $usage_str;
+  unless (defined $usage_str) {
+    if (%subcommands) {
+      $usage_str = "Usage: $prog_name %o [subcommand]";
+    } else {
+      $usage_str = "Usage: $prog_name %o";
+    }
+  }
 
   my ($opt, $usage) = describe_options(
     $usage_str,
