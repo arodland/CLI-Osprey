@@ -3,10 +3,9 @@ use strict;
 use warnings;
 use Carp 'croak';
 use Path::Tiny ();
-use Scalar::Util qw(blessed reftype);
+use Scalar::Util qw(blessed);
 
 use CLI::Osprey::Descriptive;
-use CLI::Osprey::InlineSubcommand ();
 
 # ABSTRACT: Role for CLI::Osprey applications
 # VERSION
@@ -167,12 +166,7 @@ sub new_with_options {
     } elsif (%subcommands) {
       $subcommand_name = shift @ARGV; # Remove it so the subcommand sees only options
       $subcommand_class = $subcommands{$subcommand_name};
-      if (ref($subcommand_class) && reftype($subcommand_class) eq 'CODE') {
-        $subcommand_class = CLI::Osprey::InlineSubcommand->new(
-          name => $subcommand_name,
-          method => $subcommand_class,
-        );
-      } elsif (!defined $subcommand_class) {
+      if (!defined $subcommand_class) {
         print STDERR "Unknown subcommand '$subcommand_name'.\n";
         return $class->osprey_usage(1, $usage);
       }

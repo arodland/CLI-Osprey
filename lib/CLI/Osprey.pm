@@ -8,6 +8,9 @@ use warnings;
 
 use Carp 'croak';
 use Module::Runtime 'use_module';
+use Scalar::Util qw(reftype);
+
+use CLI::Osprey::InlineSubcommand ();
 
 my @OPTIONS_ATTRIBUTES = qw(
   option option_name format short repeatable negativable spacer_before spacer_after doc long_doc format_doc order hidden
@@ -87,10 +90,20 @@ sub import {
   };
 
   my $subcommand = sub {
-    my ($name, $module) = @_;
-    use_module($module) unless ref($module) eq 'CODE';
+    my ($name, $subobject) = @_;
 
-    $subcommands->{$name} = $module;
+    if (ref($subobject) && reftype($subobject) eq 'CODE') {
+      my @args = @_[2 .. $#_];
+      $subobject = CLI::Osprey::InlineSubcommand->new(
+        name => $name,
+        method => $subobject,
+        @args,
+      );
+    } else {
+      use_module($subobject);
+    }
+
+    $subcommands->{$name} = $subobject;
     $apply_modifiers->();
   };
 
