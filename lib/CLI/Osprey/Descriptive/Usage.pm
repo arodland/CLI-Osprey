@@ -121,7 +121,7 @@ sub describe_opt {
   my ($self, $opt) = @_;
 
   if ($opt->{desc} eq 'spacer') {
-    return;
+    return { spacer => 1 };
   }
 
   my $name = my $attr_name = $opt->{name};
@@ -198,7 +198,7 @@ sub header {
   my @descs = $self->describe_options;
 
   my $option_text = join "\n", $self->wrap(
-    join(" ", map $_->{short}, @descs),
+    join(" ", map $_->{short}, grep !$_->{spacer}, @descs),
     "  ",
   );
 
@@ -219,14 +219,19 @@ sub option_help {
 
   my @descs = $self->describe_options;
 
-  my $maxlen = maxlen(map $_->{long}, @descs);
+  my $maxlen = maxlen(map $_->{long}, grep !$_->{spacer}, @descs);
 
-  my @out = map {
-    $self->wrap(
-      sprintf("%*s  %s", -$maxlen, $_->{long}, $_->{doc}),
-      " " x ($maxlen + 2),
-    )
-  } @descs;
+  my @out;
+  for my $desc (@descs) {
+    if ($desc->{spacer}) {
+      push @out, "";
+    } else {
+      push @out, $self->wrap(
+        sprintf("%*s  %s", -$maxlen, $desc->{long}, $desc->{doc}),
+        " " x ($maxlen + 2),
+      );
+    }
+  }
 
   return join("\n", $self->header, $self->sub_commands_text('long'), @out);
 }
