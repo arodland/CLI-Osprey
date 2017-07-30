@@ -83,8 +83,26 @@ amount of additional typing gives you more control and less fragility.
 
 There are also a few things MooX::Options has that Osprey lacks. While they may
 be added in the future, I haven't seen the need yet. Currently known missing
-feeatures are JSON options, C<autosplit>, C<autorange>, and C<config_from_file>
-support.
+feeatures are JSON options, C<config_from_file> support, C<autosplit>, and C<autorange>.
+
+For JSON support, you can use a coercion on the attribute, turning it from a
+string to a ref via C<decode_json>.
+
+To default an app's options from a config file, you may want to do something
+like this in your script file:
+
+    use JSON 'decode_json';
+    use Path::Tiny;
+
+    MyApp->new_with_options(
+        map decode_json(path($_)->slurp),
+        grep -f,
+        "$ENV{HOME}/.myapprc"
+    )->run;
+
+Provided that C<prefer_commandline> is true (which is the default), any
+options in C<.myapprc> will be used as defaults if that file exists, but will
+still be overrideable from the commandline.
 
 =head1 IMPORTED METHODS
 
@@ -149,6 +167,27 @@ C<order> (or none at all) will appear in the help text in the same order as
 their C<option> keywords were executed. If it is false, they will appear in
 alphabetical order instead.
 
+=head2 desc
+
+Default: none.
+
+A short description of the command, to be shown at the top of the manual
+page, and in the listing of subcommands if this command is a subcommand.
+
+=head2 description_pod
+
+Default: none.
+
+A description, of any length, in POD format, to be included as the
+C<DESCRIPTION> section of the command's manual page.
+
+=head2 extra_pod
+
+Default: none.
+
+Arbitrary extra POD to be included between the C<DESCRIPTION> and
+C<OPTIONS> sections of the manual page.
+
 =head2 getopt_options
 
 Default: C<['require_order']>.
@@ -160,7 +199,7 @@ subcommands entirely. MooX::Options calls this parameter C<flavour>.
 
 =head2 prefer_commandline
 
-Default: false.
+Default: true.
 
 If true, command-line options override key/value pairs passed to
 C<new_with_options>. If false, the reverse is true.
@@ -182,6 +221,193 @@ Default: C<"USAGE: $program_name %o">
 Provides the header of the usage message printed in response to the C<-h>
 option or an error in option processing. The format of the string is described
 in L<Getopt::Long::Descriptive/"$usage_desc">.
+
+=head1 OPTION PARAMETERS
+
+=head2 doc
+
+Default: None.
+
+Documentation for the option, used in C<--help> output. For best results, should
+be no more than a short paragraph.
+
+=head2 format
+
+Default: None (i.e. boolean).
+
+The format of the option argument, same as L<Getopt::Long>. An option with no
+format is a boolean, not taking an additional argument. Other formats are:
+
+=over
+
+=item s
+
+string
+
+=item i
+
+decimal integer
+
+=item o
+
+integer (supports C<0x> for hex, C<0b> for binary, and C<0> for octal).
+
+=item f
+
+floating-point number
+
+=back
+
+=head2 format_doc
+
+Default: depends on L</format>.
+
+Describes the type of an option's argument. For example, if the string option
+C<copy-to> specifies a hostname, you can give it C<< format_doc => "hostname" >>
+and it will display as S<< "B<--copy-to> I<hostname>" >> in the help text,
+instead of S<< "B<--copy-to> I<string>" >>.
+
+=head2 hidden
+
+Default: B<false>.
+
+A C<hidden> option will be recognized, but not listed in automatically generated
+documentation.
+
+=head2 negatable
+
+Default: B<false>.
+
+Adds the C<--no-> version of the option, which sets it to a false value.
+Equivalent to C<!> in L<Getopt::Long>.
+
+=head2 option
+
+Default: Same as the attribute name, with underscores replaced by hyphens.
+
+Allows the command-line option for an attribute to differ from the attribute
+name -- like C<init_arg> except for the commandline.
+
+=head2 long_doc
+
+Default: none.
+
+Long documentation of the option for the manual page. This is POD, so POD
+formatting is available, and paragraphs need to be separated by C<"\n\n">. If
+not provided, the short documentation will be used instead.
+
+=head2 order
+
+Default: None.
+
+Allows controlling the order that options are listed in the help text. Options
+without an order attribute are sorted by the order their C<option> statements
+are executed, if L</added_order> is true, and by alphabetical order otherwise.
+They are placed as though they had order 9999, so use small values to sort
+before automaticall-sorted options, and values of 10000 and up to sort at the
+end.
+
+=head2 repeatable
+
+Default: B<false>.
+
+Allows an option to be specified more than once. When used on a "boolean"
+option with no L</format>, each appearace of the option will increment the value
+by 1 (equivalent to C<+> in L<Getopt::Long>. When used on an option with
+arguments, produces an arrayref, one value per appearance of the option.
+
+=head2 required
+
+Default: B<false>.
+
+This is a Moo/Moose feature honored by Osprey. A C<required> attribute must be
+passed on the commandline unless it's passed to the constructor. Generated
+documentation will show the option as non-optional.
+
+=head2 short
+
+Default: None.
+
+Gives an option a single-character "short" form, e.g. C<-v> for C<--verbose>.
+
+=head2 spacer_before
+
+Default: B<false>.
+
+Causes a blank line to appear before this option in help output.
+
+=head2 spacer_after
+
+Default: B<false>.
+
+Causes a blank line to appear after this option in help output.
+
+=head1 SUBCOMMANDS
+
+An Osprey command can have subcommands with their own options, documentation,
+etc., allowing for complicated applications under the roof of a single command.
+Osprey will parse the options for all of the commands in the chain, and
+construct them in top-to-bottom order, with each subcommand receiving a
+reference to its parent.
+
+=head2 Subcommand Classes
+
+A subcommand can be another class, which also uses C<CLI::Osprey>. For example:
+
+    package MyApp;
+    use Moo;
+    use CLI::Osprey;
+
+    option verbose => (
+        is => 'ro',
+        short => 'v',
+    );
+
+    subcommand frobnicate => 'MyApp::Frobnicate';
+
+    package MyApp::Frobnicate;
+    use Moo;
+    use CLI::Osprey;
+
+    option target => (
+        is => 'ro',
+        format => 's',
+    );
+
+    sub run {
+        my ($self) = @_;
+        if ($self->parent_command->verbose) {
+            say "Be dangerous, and unpredictable... and make a lot of noise.";
+        }
+        $self->do_something_with($self->target);
+    }
+
+=head2 Inline Subcommands
+
+A subcommand can also be specified as a coderef, for when a separate class
+would be excessive. For example:
+
+    package Greet;
+    use Moo;
+    use CLI::Osprey;
+
+    option target => (
+        is => 'ro',
+        default => "world",
+    );
+
+    subcommand hello => sub {
+        my ($self, $parent) = @_;
+        say "Hello ", $parent->target;
+    };
+
+    subcommand goodbye => sub {
+        my ($self, $parent) = @_;
+        say "Goodbye ", $parent->target;
+    };
+
+which can be invoked as C<greet --target world hello>. Inline subcommands are
+implemented using L<CLI::Osprey::InlineSubcommand>.
 
 =head1 THANKS
 
