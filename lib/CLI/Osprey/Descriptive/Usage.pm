@@ -150,7 +150,7 @@ sub describe_opt {
   my ($short, $format) = $opt->{spec} =~ /(?:\|(\w))?(?:=(.*?))?$/;
 
   my $array;
-  if (defined $format && $format =~ s/\@$//) {
+  if (defined $format && $format =~ s/[\@\+]$//) {
     $array = 1;
   }
 
@@ -188,13 +188,14 @@ sub describe_opt {
     $podlongspec .= " I<< $format_doc->{long} >>";
   }
 
-  if (defined $option_attrs && !$option_attrs->{required}) {
-    $shortspec = "[$shortspec]";
-    $podshortspec = "[$podshortspec]";
-  }
   if ($array) {
     $shortspec .= "...";
     $podshortspec .= "...";
+  }
+
+  if (defined $option_attrs && !$option_attrs->{required}) {
+    $shortspec = "[$shortspec]";
+    $podshortspec = "[$podshortspec]";
   }
 
   return {
