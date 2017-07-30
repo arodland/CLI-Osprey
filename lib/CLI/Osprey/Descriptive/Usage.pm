@@ -166,22 +166,29 @@ sub describe_opt {
   }
 
   my ($shortspec, $longspec) = ($spec, $spec);
+  my ($podshortspec, $podlongspec) = ("B<< $spec >>", "B<< $spec >>");
 
   if (defined $format_doc) {
     $shortspec .= " $format_doc->{short}";
+    $podshortspec .= " I<< $format_doc->{short} >>";
     $longspec .= " $format_doc->{long}";
+    $podlongspec .= " I<< $format_doc->{long} >>";
   }
 
   if (defined $option_attrs && !$option_attrs->{required}) {
     $shortspec = "[$shortspec]";
+    $podshortspec = "[$podshortspec]";
   }
   if ($array) {
     $shortspec .= "...";
+    $podshortspec .= "...";
   }
 
   return {
     short => $shortspec,
     long => $longspec,
+    podshort => $podshortspec,
+    podlong => $podlongspec,
     doc => defined($option_attrs->{long_doc}) ? $option_attrs->{long_doc} : $opt->{desc},
   };
 }
@@ -235,5 +242,66 @@ sub option_help {
 
   return join("\n", $self->header, $self->sub_commands_text('long'), @out);
 }
+
+sub option_pod {
+  my ($self) = @_;
+
+  my %osprey_config = $self->target->_osprey_options;
+
+  my @descs = $self->describe_options;
+  my @pod;
+
+  push @pod, "=encoding UTF-8";
+
+  push @pod, "=head1 NAME";
+  push @pod, $self->{prog_name} . ($osprey_config{doc} ? " - " . $osprey_config{doc} : "" );
+
+  push @pod, "=head1 SYNOPSIS";
+  push @pod, "B<< $self->{prog_name} >> " 
+    . join(" ", map "S<<< $_->{podshort} >>>", grep !$_->{spacer}, @descs);
+
+  if ($osprey_config{description_pod}) {
+    push @pod, "=head1 DESCRIPTION";
+    push @pod, $osprey_config{description_pod};
+  }
+
+  if ($osprey_config{extra_pod}) {
+    push @pod, $osprey_config{extra_pod};
+  }
+
+  push @pod, "=head1 OPTIONS";
+  push @pod, "=over";
+
+  for my $desc (@descs) {
+    if ($desc->{spacer}) {
+      push @pod, "=back";
+      push @pod, "E<32>" x 40;
+      push @pod, "=over";
+    } else {
+      push @pod, "=item $desc->{podlong}";
+      push @pod, $desc->{doc};
+    }
+  }
+
+  push @pod, "=back";
+
+  if ($self->has_target && (my %subcommands = $self->target->_osprey_subcommands)) {
+    push @pod, "=head1 COMMANDS";
+    push @pod, "=over";
+
+    for my $name (sort keys %subcommands) {
+      my $desc = $subcommands{$name}->can('_osprey_subcommand_doc') && $subcommands{$name}->_osprey_subcommand_doc;
+      push @pod, "=item B<< $name >>";
+      if ($desc) {
+        push @pod, $desc;
+      }
+    }
+
+    push @pod, "=back";
+  }
+
+  return join("\n\n", @pod);
+}
+
 
 1;

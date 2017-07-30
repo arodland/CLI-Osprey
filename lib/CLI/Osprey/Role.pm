@@ -307,7 +307,7 @@ sub osprey_man {
 
   my $tmpdir = Path::Tiny->tempdir;
   my $podfile = $tmpdir->child("help.pod");
-  $podfile->spew_utf8($usage->osprey_pod);
+  $podfile->spew_utf8($usage->option_pod);
 
   require Pod::Usage;
   Pod::Usage::pod2usage(
