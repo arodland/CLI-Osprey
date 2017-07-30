@@ -15,7 +15,7 @@ sub _osprey_option_to_getopt {
   my ($name, %attributes) = @_;
   my $getopt = join('|', grep defined, ($name, $attributes{short}));
   $getopt .= '+' if $attributes{repeatable} && !defined $attributes{format};
-  $getopt .= '!' if $attributes{negativable};
+  $getopt .= '!' if $attributes{negatable};
   $getopt .= '=' . $attributes{format} if defined $attributes{format};
   $getopt .= '@' if $attributes{repeatable} && defined $attributes{format};
   return $getopt;

@@ -13,7 +13,7 @@ use Scalar::Util qw(reftype);
 use CLI::Osprey::InlineSubcommand ();
 
 my @OPTIONS_ATTRIBUTES = qw(
-  option option_name format short repeatable negativable spacer_before spacer_after doc long_doc format_doc order hidden
+  option option_name format short repeatable negatable spacer_before spacer_after doc long_doc format_doc order hidden
 );
 
 sub import {
