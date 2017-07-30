@@ -93,10 +93,10 @@ sub sub_commands_text {
       push @out, "Subcommands available:";
 
       for my $name (sort keys %subcommands) {
-        my $desc = $subcommands{$name}->can('_osprey_subcommand_doc') && $subcommands{$name}->_osprey_subcommand_doc;
+        my $desc = $subcommands{$name}->can('_osprey_subcommand_desc') && $subcommands{$name}->_osprey_subcommand_desc;
         if (defined $desc) {
           push @out, $self->wrap(
-            sprintf("%*s  %s", -$maxlen, $name, $subcommands{$name}->_osprey_subcommand_doc),
+            sprintf("%*s  %s", -$maxlen, $name, $subcommands{$name}->_osprey_subcommand_desc),
             " " x ($maxlen + 2)
           );
         } else {
@@ -254,7 +254,7 @@ sub option_pod {
   push @pod, "=encoding UTF-8";
 
   push @pod, "=head1 NAME";
-  push @pod, $self->{prog_name} . ($osprey_config{doc} ? " - " . $osprey_config{doc} : "" );
+  push @pod, $self->{prog_name} . ($osprey_config{desc} ? " - " . $osprey_config{desc} : "" );
 
   push @pod, "=head1 SYNOPSIS";
   push @pod, "B<< $self->{prog_name} >> " 
@@ -290,7 +290,7 @@ sub option_pod {
     push @pod, "=over";
 
     for my $name (sort keys %subcommands) {
-      my $desc = $subcommands{$name}->can('_osprey_subcommand_doc') && $subcommands{$name}->_osprey_subcommand_doc;
+      my $desc = $subcommands{$name}->can('_osprey_subcommand_desc') && $subcommands{$name}->_osprey_subcommand_desc;
       push @pod, "=item B<< $name >>";
       if ($desc) {
         push @pod, $desc;

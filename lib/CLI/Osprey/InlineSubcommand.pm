@@ -12,9 +12,9 @@ has 'name' => (
   required => 1,
 );
 
-has 'doc' => (
+has 'desc' => (
   is => 'bare',
-  reader => '_osprey_subcommand_doc',
+  reader => '_osprey_subcommand_desc',
 );
 
 has 'method' => (

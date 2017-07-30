@@ -320,10 +320,10 @@ sub osprey_man {
   exit(0);
 }
 
-sub _osprey_subcommand_doc {
+sub _osprey_subcommand_desc {
   my ($class) = @_;
   my %config = $class->_osprey_config;
-  return $config{doc};
+  return $config{desc};
 }
 
 1;
