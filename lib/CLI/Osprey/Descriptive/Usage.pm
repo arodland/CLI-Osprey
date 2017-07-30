@@ -117,6 +117,19 @@ sub sub_commands_text {
   return;
 }
 
+sub pod_escape {
+  my ($self, $text) = @_;
+  my %map = (
+    '<' => 'lt',
+    '>' => 'gt',
+    '|' => 'verbar',
+    '/' => 'sol',
+  );
+
+  $text =~ s,([<>|/]),"E<$map{$1}>",eg;
+  return $text;
+}
+
 sub describe_opt {
   my ($self, $opt) = @_;
 
@@ -190,7 +203,7 @@ sub describe_opt {
     podshort => $podshortspec,
     podlong => $podlongspec,
     doc => $opt->{desc},
-    long_doc => defined($option_attrs->{long_doc}) ? $option_attrs->{long_doc} : $opt->{desc},
+    long_doc => defined($option_attrs->{long_doc}) ? $option_attrs->{long_doc} : $self->pod_escape($opt->{desc}),
   };
 }
 
