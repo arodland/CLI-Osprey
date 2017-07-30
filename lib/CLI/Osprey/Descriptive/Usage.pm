@@ -166,16 +166,17 @@ sub describe_opt {
   }
 
   my ($shortspec, $longspec) = ($spec, $spec);
+
+  if (defined $format_doc) {
+    $shortspec .= " $format_doc->{short}";
+    $longspec .= " $format_doc->{long}";
+  }
+
   if (defined $option_attrs && !$option_attrs->{required}) {
     $shortspec = "[$shortspec]";
   }
   if ($array) {
     $shortspec .= "...";
-  }
-
-  if (defined $format_doc) {
-    $shortspec .= " $format_doc->{short}";
-    $longspec .= " $format_doc->{long}";
   }
 
   return {
