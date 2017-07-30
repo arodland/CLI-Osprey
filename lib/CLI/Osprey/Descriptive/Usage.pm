@@ -189,7 +189,8 @@ sub describe_opt {
     long => $longspec,
     podshort => $podshortspec,
     podlong => $podlongspec,
-    doc => defined($option_attrs->{long_doc}) ? $option_attrs->{long_doc} : $opt->{desc},
+    doc => $opt->{desc},
+    long_doc => defined($option_attrs->{long_doc}) ? $option_attrs->{long_doc} : $opt->{desc},
   };
 }
 
@@ -279,7 +280,7 @@ sub option_pod {
       push @pod, "=over";
     } else {
       push @pod, "=item $desc->{podlong}";
-      push @pod, $desc->{doc};
+      push @pod, $desc->{long_doc};
     }
   }
 
