@@ -118,7 +118,7 @@ sub sub_commands_text {
 }
 
 sub describe_opt {
-  my ($self, $opt, $length) = @_;
+  my ($self, $opt) = @_;
 
   if ($opt->{desc} eq 'spacer') {
     return;
@@ -141,12 +141,15 @@ sub describe_opt {
     $array = 1;
   }
 
-  my $format_doc_str;
+  my $format_doc;
   if (defined $format) {
     if (defined $option_attrs->{format_doc}) {
-      $format_doc_str = $option_attrs->{format_doc};
+      $format_doc = {
+        short => $option_attrs->{format_doc},
+        long => $option_attrs->{format_doc},
+      };
     } else {
-      $format_doc_str = $format_doc{$format}{$length};
+      $format_doc = $format_doc{$format};
     }
   }
 
@@ -162,41 +165,39 @@ sub describe_opt {
     $spec .= "-$name";
   }
 
-  if (defined $format_doc_str) {
-    $spec .= " $format_doc_str";
+  my ($shortspec, $longspec) = ($spec, $spec);
+  if (defined $option_attrs && !$option_attrs->{required}) {
+    $shortspec = "[$shortspec]";
+  }
+  if ($array) {
+    $shortspec .= "...";
   }
 
-  if ($length eq 'short') {
-    if (defined $option_attrs && !$option_attrs->{required}) {
-      $spec = "[$spec]";
-    }
-
-    if ($array) {
-      $spec .= "...";
-    }
+  if (defined $format_doc) {
+    $shortspec .= " $format_doc->{short}";
+    $longspec .= " $format_doc->{long}";
   }
 
-  if ($length eq 'long') {
-    return ($spec, defined($option_attrs->{long_doc}) ? $option_attrs->{long_doc} : $opt->{desc});
-  } else {
-    return $spec;
-  }
+  return {
+    short => $shortspec,
+    long => $longspec,
+    doc => defined($option_attrs->{long_doc}) ? $option_attrs->{long_doc} : $opt->{desc},
+  };
+}
+
+sub describe_options {
+  my ($self) = @_;
+
+  return map $self->describe_opt($_), @{ $self->options };
 }
 
 sub header {
   my ($self) = @_;
 
-  my $getopt_options = $self->options;
-
-  my @descs;
-  for my $opt (@$getopt_options) {
-    if ($opt->{desc} ne 'spacer' && length($opt->{name}) > 1) {
-      push @descs, $self->describe_opt($opt, 'short');
-    }
-  }
+  my @descs = $self->describe_options;
 
   my $option_text = join "\n", $self->wrap(
-    join(" ", @descs),
+    join(" ", map $_->{short}, @descs),
     "  ",
   );
 
@@ -215,17 +216,13 @@ sub text {
 sub option_help {
   my ($self) = @_;
 
-  my $getopt_options = $self->options;
+  my @descs = $self->describe_options;
 
-  my @descs;
-  for my $opt (@$getopt_options) {
-    push @descs, [ $self->describe_opt($opt, 'long') ] unless $opt->{desc} eq 'spacer';
-  }
-  my $maxlen = maxlen(map $_->[0], @descs);
+  my $maxlen = maxlen(map $_->{long}, @descs);
 
   my @out = map {
     $self->wrap(
-      sprintf("%*s  %s", -$maxlen, $_->[0], $_->[1]),
+      sprintf("%*s  %s", -$maxlen, $_->{long}, $_->{doc}),
       " " x ($maxlen + 2),
     )
   } @descs;
