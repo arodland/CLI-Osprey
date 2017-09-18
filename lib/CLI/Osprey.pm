@@ -38,6 +38,11 @@ sub import {
         return $class->maybe::next::method(@_);
       }
 
+      sub _osprey_positional {
+        my $class = shift;
+        return $class->maybe::next::method(@_);
+      }
+
       sub _osprey_config {
         my $class = shift;
         return $class->maybe::next::method(@_);
@@ -64,6 +69,7 @@ sub import {
   });
 
   my $options_data = { };
+  my $positional = [ ];
   my $subcommands = { };
 
   my $apply_modifiers = sub {
@@ -72,6 +78,10 @@ sub import {
     $around->(_osprey_options => sub {
       my ($orig, $self) = (shift, shift);
       return $self->$orig(@_), %$options_data;
+    });
+    $around->(_osprey_positional => sub {
+      my ($orig, $self) = (shift, shift);
+      return $self->$orig(@_), @$positional;
     });
     $around->(_osprey_subcommands => sub {
       my ($orig, $self) = (shift, shift);
@@ -86,6 +96,13 @@ sub import {
 
     $has->($name => _non_option_attributes(%attributes));
     $options_data->{$name} = _option_attributes($name, added_order => ++$added_order, %attributes);
+    $apply_modifiers->();
+  };
+
+  my $positional = sub {
+    my ($name, %attributes) = @_;
+    $has->($name => _non_option_attributes(%attributes));
+    push @$positional, _option_attributes($name, %attributes);
     $apply_modifiers->();
   };
 
@@ -109,12 +126,14 @@ sub import {
 
   if (my $info = $Role::Tiny::INFO{$target}) {
     $info->{not_methods}{$option} = $option;
+    $info->{not_methods}{$positional} = $positional;
     $info->{not_methods}{$subcommand} = $subcommand;
   }
 
   {
     no strict 'refs';
     *{"${target}::option"} = $option;
+    *{"${target}::positional"} = $positional;
     *{"${target}::subcommand"} = $subcommand;
   }
 
