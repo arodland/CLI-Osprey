@@ -110,7 +110,7 @@ sub sub_commands_text {
       return "",
       $self->wrap(
         "Subcommands available: " . join(" | ", sort keys %subcommands),
-        length("Subcommands available: ")
+        " " x length("Subcommands available: ")
       );
     }
   }
