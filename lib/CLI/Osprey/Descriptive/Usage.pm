@@ -9,6 +9,7 @@ use overload (
 );
 
 use Getopt::Long::Descriptive::Usage ();
+our @ISA = qw(Getopt::Long::Descriptive::Usage);
 
 # ABSTRACT: Produce usage information for CLI::Osprey apps
 # VERSION
@@ -317,6 +318,5 @@ sub option_pod {
 
   return join("\n\n", @pod);
 }
-
 
 1;
