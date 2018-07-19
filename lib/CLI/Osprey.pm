@@ -85,7 +85,8 @@ sub import {
     my ($name, %attributes) = @_;
 
     $has->($name => _non_option_attributes(%attributes));
-    $options_data->{$name} = _option_attributes($name, added_order => ++$added_order, %attributes);
+    $options_data->{$name} = _option_attributes($name, %attributes);
+    $options_data->{$name}{added_order} = ++$added_order;
     $apply_modifiers->();
   };
 
