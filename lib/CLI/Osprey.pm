@@ -16,6 +16,8 @@ my @OPTIONS_ATTRIBUTES = qw(
   option option_name format short repeatable negatable spacer_before spacer_after doc long_doc format_doc order hidden
 );
 
+my @OBTAINABLE_OPT_ATTRIBS = ( @OPTIONS_ATTRIBUTES, qw/added_order/ );
+
 sub import {
   my (undef, @import_options) = @_;
   my $target = caller;
@@ -127,7 +129,7 @@ sub import {
 sub _non_option_attributes {
   my (%attributes) = @_;
   my %filter_out;
-  @filter_out{@OPTIONS_ATTRIBUTES} = ();
+  @filter_out{@OBTAINABLE_OPT_ATTRIBS} = ();
   return map {
     $_ => $attributes{$_}
   } grep {
@@ -142,7 +144,7 @@ sub _option_attributes {
     ($attributes{option} = $name) =~ tr/_/-/;
   }
   my $ret = {};
-  for (@OPTIONS_ATTRIBUTES) {
+  for (@OBTAINABLE_OPT_ATTRIBS) {
     $ret->{$_} = $attributes{$_} if exists $attributes{$_};
   }
   return $ret;
