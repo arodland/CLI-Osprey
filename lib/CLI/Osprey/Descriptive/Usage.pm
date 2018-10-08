@@ -8,7 +8,7 @@ use overload (
   q{""} => "text",
 );
 
-use Getopt::Long::Descriptive::Usage ();
+extends 'Getopt::Long::Descriptive::Usage';
 
 # ABSTRACT: Produce usage information for CLI::Osprey apps
 # VERSION
