@@ -152,9 +152,9 @@ sub new_with_options {
 
   my %merged_params;
   if ($config{prefer_commandline}) {
-    %merged_params = (%$parsed_params, %params);
-  } else {
     %merged_params = (%params, %$parsed_params);
+  } else {
+    %merged_params = (%$parsed_params, %params);
   }
 
   my %subcommands = $class->_osprey_subcommands;
