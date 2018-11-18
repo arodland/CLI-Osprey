@@ -10,6 +10,8 @@ use Carp 'croak';
 use Module::Runtime 'use_module';
 use Scalar::Util qw(reftype);
 
+use Moo::Role qw(); # only want class methods, not setting up a role
+
 use CLI::Osprey::InlineSubcommand ();
 
 my @OPTIONS_ATTRIBUTES = qw(
@@ -29,9 +31,7 @@ sub import {
   my $around = $target->can('around');
   my $has = $target->can('has');
 
-  my @target_isa = do { no strict 'refs'; @{"${target}::ISA"} };
-  
-  if (@target_isa) { # not in a role
+  if ( ! Moo::Role->is_role( $target ) ) { # not in a role
     eval "package $target;\n" . q{
       sub _osprey_options {
         my $class = shift;
