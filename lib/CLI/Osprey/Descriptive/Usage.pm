@@ -10,6 +10,8 @@ use overload (
 
 use Getopt::Long::Descriptive::Usage ();
 
+*option_text = \&Getopt::Long::Descriptive::Usage::option_text;
+
 # ABSTRACT: Produce usage information for CLI::Osprey apps
 # VERSION
 # AUTHORITY
@@ -318,5 +320,15 @@ sub option_pod {
   return join("\n\n", @pod);
 }
 
+sub die  {
+  my $self = shift;
+  my $arg  = shift || {};
+
+  die(
+    join q{}, grep { defined } $arg->{pre_text}, $self->text, $arg->{post_text}
+  );
+}
+
+sub warn { warn shift->text }
 
 1;
