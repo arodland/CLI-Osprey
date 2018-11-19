@@ -1,26 +1,24 @@
-package MyCmd::Yell;
+package MyCmd::Yell::Quietly;
 use Moo;
 use CLI::Osprey;
 
 with 'MyCmd::SubCommandRole';
-
-subcommand quietly => __PACKAGE__ . '::Quietly';
 
 has '+parent_command' => (
     is      => 'ro',
     handles => ['message'],
 );
 
-option loudness => (
+option quiet => (
     is      => 'ro',
     format  => 'n',
-    doc     => 'how loud should we yell',
-    default => 1,
+    doc     => 'how quiet should we yell',
+    default => 0,
 );
 
 sub run {
     my ( $self ) = @_;
-    print uc $self->message, ( '!' ) x $self->loudness, "\n";
+    print  "Sh", ( 'h' ) x $self->quiet, ': ', $self->message, "\n";
 }
 
 1;
