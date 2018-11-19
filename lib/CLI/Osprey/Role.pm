@@ -193,7 +193,11 @@ sub new_with_options {
   }
 
   if ($subcommand_class) {
-    return $subcommand_class->new_with_options(%params, parent_command => $self, invoked_as => "$params{invoked_as} $subcommand_name");
+      return $subcommand_class->new_with_options(%params,
+						 parent_command => $self,
+						 subcommand => $subcommand_name,
+						 invoked_as => "$params{invoked_as} $subcommand_name",
+						);
   } else {
     return $self;
   }
