@@ -22,14 +22,10 @@ sub import {
   my (undef, @import_options) = @_;
   my $target = caller;
 
-  for my $method (qw(with around has)) {
-    next if $target->can($method);
-    croak "Can't find the method '$method' in package '$target'. CLI::Osprey requires a Role::Tiny-compatible object system like Moo or Moose.";
-  }
-
-  my $with = $target->can('with');
-  my $around = $target->can('around');
-  my $has = $target->can('has');
+  my ( $with, $around, $has ) =
+    map { $target->can($_)
+	  or croak "Can't find the method '$_' in package '$target'. CLI::Osprey requires a Role::Tiny-compatible object system like Moo or Moose.";
+      } qw[ with around has ];
 
   if ( ! Moo::Role->is_role( $target ) ) { # not in a role
     eval "package $target;\n" . q{
