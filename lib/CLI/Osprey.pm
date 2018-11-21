@@ -27,26 +27,6 @@ sub import {
 	  or croak "Can't find the method '$_' in package '$target'. CLI::Osprey requires a Role::Tiny-compatible object system like Moo or Moose.";
       } qw[ with around has ];
 
-  if ( ! Moo::Role->is_role( $target ) ) { # not in a role
-    eval "package $target;\n" . q{
-      sub _osprey_options {
-        my $class = shift;
-        return $class->maybe::next::method(@_);
-      }
-
-      sub _osprey_config {
-        my $class = shift;
-        return $class->maybe::next::method(@_);
-      }
-
-      sub _osprey_subcommands {
-        my $class = shift;
-        return $class->maybe::next::method(@_);
-      }
-      1;
-    } || croak($@);
-  }
-
   my $osprey_config = {
     preserve_argv => 1,
     abbreviate => 1,
