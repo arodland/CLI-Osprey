@@ -6,41 +6,29 @@ use Capture::Tiny qw( capture );
 use Test::Lib;
 use MyTest::Class::Basic;
 
-subtest 'command' => sub {
+sub check_commandline {
+    my ($args, $expected_stdout, $expected_stderr) = @_;
+    local @ARGV = @$args;
 
-    subtest "default options" => sub {
-	local @ARGV = ();
-	my ( $stdout, $stderr, @result ) =
-	   capture { MyTest::Class::Basic->new_with_options->run };
+    my ( $stdout, $stderr, @result ) =
+        capture { MyTest::Class::Basic->new_with_options->run };
 
-	is ( $stdout, "Hello world!\n", "message sent to stdout" );
-	is ( $stderr, '', "empty stderr" );
+    like ( $stdout, $expected_stdout, "stdout" );
+	like ( $stderr, $expected_stderr,  "stderr" );
+}
 
-    };
-
-    subtest "command line options" => sub {
-	local @ARGV = ( '--message', 'Hello Cleveland!' );
-	my ( $stdout, $stderr, @result ) =
-	   capture { MyTest::Class::Basic->new_with_options->run };
-
-	is ( $stdout, "Hello Cleveland!\n", "message sent to stdout" );
-	is ( $stderr, '', "empty stderr" );
-
-    };
-
+subtest "default options" => sub {
+    check_commandline([], qr/^Hello world!$/, qr/^$/);
 };
 
-subtest 'subcommand' => sub {
+subtest "command line options" => sub {
+    check_commandline(['--message', 'Hello Cleveland!'], qr/^Hello Cleveland!$/, qr/^$/);
+};
 
+subtest "subcommand" => sub {
     subtest "default options" => sub {
-	local @ARGV = qw ( yell );
-	my ( $stdout, $stderr, @result ) =
-	   capture { MyTest::Class::Basic->new_with_options->run };
-
-	is ( $stdout, "HELLO WORLD!\n", "message sent to stdout" );
-	is ( $stderr, '', "empty stderr" );
+        check_commandline(['yell'], qr/^HELLO WORLD!$/, qr/^$/);
     };
-
 };
 
 done_testing;
