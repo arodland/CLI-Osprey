@@ -6,6 +6,7 @@ use CLI::Osprey;
 option 'message' => (
     is => 'ro',
     format => 's',
+    short => 'x',
     doc => 'The message to display',
     default => 'Hello world!',
 );

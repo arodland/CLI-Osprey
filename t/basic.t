@@ -31,4 +31,19 @@ subtest "subcommand" => sub {
     };
 };
 
+subtest "short" => sub {
+    check_commandline(['-x', 'Shorts are comfy and easy to wear!'], qr/^Shorts are comfy and easy to wear!$/, qr/^$/);
+};
+
+subtest "prefix" => sub {
+    check_commandline(['--mess', 'This is a mess.'], qr/This is a mess\.$/, qr/^$/);
+};
+
+subtest "short with two dashes", sub {
+    TODO: {
+        local $TODO = "We shouldn't accept a short option with two dashes, only a valid prefix of a long option";
+        check_commandline(['--x', 'test'], qr//, qr/Unknown option: x/);
+    }
+};
+
 done_testing;
