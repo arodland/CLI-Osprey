@@ -1,6 +1,6 @@
 #! perl
 
-use Test2::V0;
+use Test::More;
 use Capture::Tiny qw( capture );
 
 use Test::Lib;
