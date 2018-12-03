@@ -1,11 +1,10 @@
 #! perl
 
-use Test2::V0;
+use Test::More;
 
 use CLI::Osprey::Descriptive::Usage;
 
-can_ok(
-    'CLI::Osprey::Descriptive::Usage',
+ok 'CLI::Osprey::Descriptive::Usage'->can($_), "can_ok $_" for (
        'new',
        'text',
        'leader_text',
