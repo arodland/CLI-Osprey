@@ -6,6 +6,7 @@ use CLI::Osprey
 
 option opt => (
   is => 'ro',
+  short => 'o',
   format => 's',
 );
 

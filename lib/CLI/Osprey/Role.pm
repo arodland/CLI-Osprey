@@ -27,6 +27,7 @@ sub _osprey_prepare_options {
   my @getopt;
   my %abbreviations;
   my %fullnames;
+  my %shortnames;
 
   my @order = sort {
     ($options->{$a}{order} || 9999) <=> ($options->{$b}{order} || 9999)
@@ -38,6 +39,7 @@ sub _osprey_prepare_options {
     my %attributes = %{ $options->{$option} };
 
     push @{ $fullnames{ $attributes{option} } }, $option;
+    push @{ $shortnames{ $attributes{short} } }, $option if defined $attributes{short};
   }
 
   for my $name (keys %fullnames) {
@@ -65,7 +67,7 @@ sub _osprey_prepare_options {
     if ($config->{abbreviate}) {
       for my $len (1 .. length($name) - 1) {
         my $abbreviated = substr $name, 0, $len;
-        push @{ $abbreviations{$abbreviated} }, $name unless exists $fullnames{$abbreviated};
+        push @{ $abbreviations{$abbreviated} }, $name unless exists $fullnames{$abbreviated} or exists $shortnames{$abbreviated};
       }
     }
   }
@@ -90,15 +92,19 @@ sub _osprey_fix_argv {
     unshift @ARGV, $arg_value if defined $arg_value;
 
     my ($dash, $negative, $arg_name_without_dash)
-      = $arg_name_with_dash =~ /^(-+)(no\-)?(.+)$/;
+      = $arg_name_with_dash =~ /^(--?)(no\-)?(.+)$/;
 
-    my $option_name = $abbreviations->{$arg_name_without_dash};
-    if (defined $option_name) {
-      if (@$option_name == 1) {
-        $option_name = $option_name->[0];
-      } else {
-        # TODO: can't we produce a warning saying that it's ambiguous and which options conflict?
-        $option_name = undef;
+    my $option_name;
+
+    if ($dash eq '--') {
+      $option_name = $abbreviations->{$arg_name_without_dash};
+      if (defined $option_name) {
+        if (@$option_name == 1) {
+          $option_name = $option_name->[0];
+        } else {
+          # TODO: can't we produce a warning saying that it's ambiguous and which options conflict?
+          $option_name = undef;
+        }
       }
     }
 
