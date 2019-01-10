@@ -2,14 +2,9 @@ package MyCmd::Yell;
 use Moo;
 use CLI::Osprey;
 
-with 'MyCmd::SubCommandRole';
+with 'MyCmd::Role::SubCommand';
 
 subcommand quietly => __PACKAGE__ . '::Quietly';
-
-has '+parent_command' => (
-    is      => 'ro',
-    handles => ['message'],
-);
 
 option loudness => (
     is      => 'ro',

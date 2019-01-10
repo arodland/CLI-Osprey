@@ -1,6 +1,8 @@
-package MyCmd::CommandRole;
+package MyCmd::Role::Command;
 
 use Moo::Role;
+
+with 'MyCmd::Role::Options';
 
 requires 'parse_options';
 
@@ -31,16 +33,7 @@ around parse_options => sub {
                 flatten_to_hash => 1,
             } )->{$config};
 
-	# this assumes a hierarchical config file, with a level for
-	# each subcommand.
-	my %subcommands = $class->_osprey_subcommands;
-        while ( my ( $key, $value ) = each %$_config ) {
-
-	    # if key is subcommand name, it's parameters for that
-	    # subcommand not for this command
-            next if exists $subcommands{$key};
-            $params->{$key} //= $value;
-        }
+        $class->_extract_options( $_config, $params );
     }
 
     return ( $params, $usage );

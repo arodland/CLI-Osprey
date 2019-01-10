@@ -2,12 +2,7 @@ package MyCmd::Yell::Quietly;
 use Moo;
 use CLI::Osprey;
 
-with 'MyCmd::SubCommandRole';
-
-has '+parent_command' => (
-    is      => 'ro',
-    handles => ['message'],
-);
+with 'MyCmd::Role::SubCommand';
 
 option quiet => (
     is      => 'ro',
