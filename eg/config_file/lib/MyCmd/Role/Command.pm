@@ -2,14 +2,9 @@ package MyCmd::Role::Command;
 
 use Moo::Role;
 
-with 'MyCmd::Role::Options';
+with 'MyCmd::Role::Config';
 
 requires 'parse_options';
-
-has _config => (
-    is      => 'ro',
-    default => sub { {} },
-);
 
 around parse_options => sub {
     my $orig = shift;
@@ -33,7 +28,7 @@ around parse_options => sub {
                 flatten_to_hash => 1,
             } )->{$config};
 
-        $class->_extract_options( $_config, $params );
+        $class->_extract_config_params( $_config, $params );
     }
 
     return ( $params, $usage );

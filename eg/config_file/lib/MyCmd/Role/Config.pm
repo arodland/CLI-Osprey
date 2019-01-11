@@ -1,8 +1,13 @@
-package MyCmd::Role::Options;
+package MyCmd::Role::Config;
 
 use Moo::Role;
 
-sub _extract_options {
+has _config => (
+    is      => 'ro',
+    default => sub { {} },
+);
+
+sub _extract_config_params {
 
     my ( $class, $config, $params ) = shift;
 
