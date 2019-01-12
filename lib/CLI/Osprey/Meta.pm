@@ -1,5 +1,9 @@
 package CLI::Osprey::Meta;
 
+# ABSTRACT: Metadata subclass for CLI::Osprey use
+# VERSION
+# AUTHORITY
+
 use Moo;
 
 has 'parent' => (
