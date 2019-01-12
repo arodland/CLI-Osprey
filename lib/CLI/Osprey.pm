@@ -75,7 +75,7 @@ sub import {
     *{"${target}::subcommand"} = $subcommand;
   }
 
-  unless ( $target->does('CLI::Osprey::Role') ) { 
+  unless ( Moo::Role::does_role( $target, 'CLI::Osprey::Role') ) {
 
     $with->('CLI::Osprey::Role');
 
