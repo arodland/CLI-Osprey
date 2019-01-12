@@ -8,8 +8,7 @@ has _config => (
 );
 
 sub _extract_config_params {
-
-    my ( $class, $config, $params ) = shift;
+    my ( $class, $config, $params ) = @_;
 
     # this assumes a hierarchical config file, with a level for
     # each subcommand.
@@ -21,7 +20,6 @@ sub _extract_config_params {
 	next if exists $subcommands{$key};
 	$params->{$key} //= $value;
     }
-
 }
 
 1;
