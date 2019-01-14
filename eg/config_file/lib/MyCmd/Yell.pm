@@ -15,7 +15,7 @@ option loudness => (
 
 sub run {
     my ( $self ) = @_;
-    print uc $self->message, ( '!' ) x $self->loudness, "\n";
+    uc ($self->message) . ( '!' ) x $self->loudness;
 }
 
 1;

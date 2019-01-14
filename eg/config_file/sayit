@@ -4,4 +4,4 @@ use lib './lib';
 
 use MyCmd;
 
-MyCmd->new_with_options->run;
+print MyCmd->new_with_options->run, "\n";

@@ -13,7 +13,7 @@ option quiet => (
 
 sub run {
     my ( $self ) = @_;
-    print  "Sh", ( 'h' ) x $self->quiet, ': ', $self->message, "\n";
+    "Sh" . ( 'h' ) x $self->quiet . ': ' . $self->message;
 }
 
 1;

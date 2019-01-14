@@ -23,7 +23,7 @@ subcommand yell => __PACKAGE__ . '::Yell';
 
 sub run {
     my ( $self ) = @_;
-    print $self->message, "\n";
+    $self->message;
 }
 
 1;
