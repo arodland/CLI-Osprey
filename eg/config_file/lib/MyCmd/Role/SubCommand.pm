@@ -11,13 +11,5 @@ has '+parent_command' => (
     handles => ['message'],
 );
 
-around new_with_options => sub {
-    my ( $orig, $class, %params ) = @_;
-
-    my $_config = $params{_config} = $params{parent_command}->_config->{$params{subcommand}} // {};
-    $class->_extract_config_params( $_config, \%params );
-    return $class->$orig( %params );
-};
-
 1;
 

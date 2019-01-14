@@ -17,7 +17,7 @@ option 'config' => (
     doc    => 'config file',
 );
 
-with 'MyCmd::Role::Command';
+with 'MyCmd::Role::Config';
 
 subcommand yell => __PACKAGE__ . '::Yell';
 
