@@ -8,7 +8,7 @@ use warnings;
 
 use Carp 'croak';
 use Module::Runtime 'use_module';
-use Scalar::Util qw(reftype);
+use Scalar::Util qw(reftype blessed);
 
 use Moo::Role qw(); # only want class methods, not setting up a role
 
@@ -83,6 +83,45 @@ sub import {
 
   my $option = sub {
     my ($name, %attributes) = @_;
+
+
+    if (   $attributes{inherit}
+        && !defined $attributes{default}
+        && !defined $attributes{builder}
+        && $attributes{is} ne 'lazy' )
+    {
+      $attributes{default} = sub {
+          my $parent = $_[0]->{parent_command};
+          return unless defined $parent;
+
+          my $mth = $parent->can( $name );
+          if ( !defined $mth ) {
+            my @path;
+
+            # we can get the class of the parent (sub)command,
+            # but we want the actual command name.  For that
+            # we need $parent->parent->_osprey_subcommands.
+            while ( defined $parent ) {
+                unshift @path,
+                  { reverse $parent->_osprey_subcommands }->{$target};
+                $target = blessed $parent;
+                last if !defined $parent->{parent_command};
+                $parent = $parent->{parent_command};
+            }
+            unshift @path, $parent->invoked_as;
+
+            my $subcommand = pop @path;
+            my $command    = join( ' / ', @path );
+
+            require Carp;
+            Carp::croak(
+                qq[parent '$command' of '$subcommand' does not have a '--$name' option\n],
+            );
+          }
+          $mth->( $parent );
+      };
+      $attributes{lazy} = 1;
+    }
 
     $has->($name => _non_option_attributes(%attributes));
     $options_data->{$name} = _option_attributes($name, %attributes);
