@@ -1,9 +1,9 @@
-package MyCmd::Role::SubCommand;
+package MyTest::Class::Config::Role::SubCommand;
 
 use Moo::Role;
 use CLI::Osprey;
 
-with 'MyCmd::Role::Config';
+with 'CLI::Osprey::Config';
 
 # this percolates up to the top level to retrieve the global message
 # option

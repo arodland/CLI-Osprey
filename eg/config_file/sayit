@@ -1,7 +1,0 @@
-#! /usr/bin/env perl
-
-use lib './lib';
-
-use MyCmd;
-
-print MyCmd->new_with_options->run, "\n";

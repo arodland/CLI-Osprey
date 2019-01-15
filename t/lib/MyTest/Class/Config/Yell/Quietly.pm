@@ -1,8 +1,8 @@
-package MyCmd::Yell::Quietly;
+package MyTest::Class::Config::Yell::Quietly;
 use Moo;
 use CLI::Osprey;
 
-with 'MyCmd::Role::SubCommand';
+with 'MyTest::Class::Config::Role::SubCommand';
 
 option quiet => (
     is      => 'ro',

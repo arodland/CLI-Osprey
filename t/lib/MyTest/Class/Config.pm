@@ -1,4 +1,4 @@
-package MyCmd;
+package MyTest::Class::Config;
 use Moo;
 
 use CLI::Osprey;
@@ -17,7 +17,7 @@ option 'config' => (
     doc    => 'config file',
 );
 
-with 'MyCmd::Role::Config';
+with 'CLI::Osprey::Config';
 
 subcommand yell => __PACKAGE__ . '::Yell';
 

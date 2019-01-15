@@ -1,8 +1,8 @@
-package MyCmd::Yell;
+package MyTest::Class::Config::Yell;
 use Moo;
 use CLI::Osprey;
 
-with 'MyCmd::Role::SubCommand';
+with 'MyTest::Class::Config::Role::SubCommand';
 
 subcommand quietly => __PACKAGE__ . '::Quietly';
 
