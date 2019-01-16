@@ -17,7 +17,8 @@ sub _osprey_option_to_getopt {
   $getopt .= '+' if $attributes{repeatable} && !defined $attributes{format};
   $getopt .= '!' if $attributes{negatable};
   $getopt .= '=' . $attributes{format} if defined $attributes{format};
-  $getopt .= '@' if $attributes{repeatable} && defined $attributes{format};
+  $getopt .= $attributes{keyvalue} ? '%' : '@'
+    if $attributes{repeatable} && defined $attributes{format};
   return $getopt;
 }
 

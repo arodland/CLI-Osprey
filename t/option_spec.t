@@ -36,6 +36,14 @@ use Test::Fatal;
     repeatable => 1,
   );
 
+  option repeatable_kv_string => (
+    is         => 'ro',
+    option     => 'kvstring',
+    format     => 's',
+    repeatable => 1,
+    keyvalue   => 1,
+  );
+
   option integer => (
     is     => 'ro',
     format => 'i'
@@ -73,23 +81,53 @@ subtest string => sub {
     is( App->new_with_options->string, 'foo', 'standard string' );
   }
 
-  {
-    local @ARGV = ();
-    is( App->new_with_options->repeatable_string,
-      undef, 'repeatable string, 0 entries' );
-  }
+  subtest 'repeatable string as array' => sub {
 
-  {
-    local @ARGV = qw( --rstring=foo );
-    is_deeply( App->new_with_options->repeatable_string,
-      ['foo'], 'repeatable string, 1 entries' );
-  }
+    {
+      local @ARGV = ();
+      is( App->new_with_options->repeatable_string,
+	undef, 'repeatable string, 0 entries' );
+    }
 
-  {
-    local @ARGV = qw( --rstring=foo --rstring=bar );
-    is_deeply( App->new_with_options->repeatable_string,
-      [qw( foo bar )], 'repeatable string, 2 entries' );
-  }
+    {
+      local @ARGV = qw( --rstring=foo );
+      is_deeply( App->new_with_options->repeatable_string,
+	['foo'], 'repeatable string, 1 entries' );
+    }
+
+    {
+      local @ARGV = qw( --rstring=foo --rstring=bar );
+      is_deeply( App->new_with_options->repeatable_string,
+	[qw( foo bar )], 'repeatable string, 2 entries' );
+    }
+  };
+
+  subtest 'repeatable string as key value' => sub {
+
+    {
+      local @ARGV = ();
+      is( App->new_with_options->repeatable_kv_string,
+	undef, 'key value string, 0 entries' );
+    }
+
+    {
+      local @ARGV = qw( --kvstring foo=bar );
+      is_deeply(
+	App->new_with_options->repeatable_kv_string,
+	{ foo => 'bar' },
+	'key value string, 1 entries'
+      );
+    }
+
+    {
+      local @ARGV = qw( --kvstring foo=bar --kvstring bar=baz );
+      is_deeply(
+	App->new_with_options->repeatable_kv_string,
+	{ foo => 'bar', bar => 'baz' },
+	'repeatable string, 2 entries'
+      );
+    }
+  };
 
 };
 
