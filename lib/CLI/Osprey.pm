@@ -100,8 +100,6 @@ sub import {
         method => $subobject,
         @args,
       );
-    } else {
-      use_module($subobject);
     }
 
     $subcommands->{$name} = $subobject;
