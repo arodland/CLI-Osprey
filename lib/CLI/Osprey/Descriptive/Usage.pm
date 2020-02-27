@@ -263,7 +263,7 @@ sub option_help {
 sub option_pod {
   my ($self) = @_;
 
-  my %osprey_config = $self->target->_osprey_options;
+  my %osprey_config = $self->target->_osprey_config;
 
   my @descs = $self->describe_options;
   my @pod;
@@ -274,7 +274,7 @@ sub option_pod {
   push @pod, $self->{prog_name} . ($osprey_config{desc} ? " - " . $osprey_config{desc} : "" );
 
   push @pod, "=head1 SYNOPSIS";
-  push @pod, "B<< $self->{prog_name} >> " 
+  push @pod, "B<< $self->{prog_name} >> "
     . join(" ", map "S<<< $_->{podshort} >>>", grep !$_->{spacer}, @descs);
 
   if ($osprey_config{description_pod}) {
