@@ -521,7 +521,7 @@ A subcommand can be another class, which also uses C<CLI::Osprey>. For example:
 
     sub run {
         my ($self) = @_;
-        if ($self->parent_command->verbose) {
+        if ($self->_meta->parent->verbose) {
             say "Be dangerous, and unpredictable... and make a lot of noise.";
         }
         $self->do_something_with($self->target);

@@ -22,27 +22,20 @@ has 'method' => (
   required => 1,
 );
 
-has 'parent_command' => (
+has 'parent' => (
   is => 'rw',
+  required => 1,
 );
 
 has 'argv' => (
   is => 'rw',
 );
 
-sub new_with_options {
-  my ($self, %args) = @_;
-  $self->parent_command($args{ parent_command });
-  $self->argv([ @ARGV ]);
-  return $self;
-}
-
 sub run {
   my ($self) = @_;
-  my $cmd = $self->parent_command;
   my $method = $self->method;
 
-  @_ = ($self->parent_command, @{ $self->argv });
+  @_ = ($self->parent, @{ $self->argv });
   goto &$method;
 }
 

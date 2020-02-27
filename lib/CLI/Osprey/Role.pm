@@ -119,16 +119,13 @@ sub _osprey_fix_argv {
 }
 
 use Moo::Role;
+use CLI::Osprey::Meta;
 
 requires qw(_osprey_config _osprey_options _osprey_subcommands);
 
-has 'parent_command' => (
-  is => 'ro',
-);
-
-has 'invoked_as' => (
-  is => 'ro',
-);
+has '_meta' => (
+		is => 'ro',
+	       );
 
 sub new_with_options {
   my ($class, %params) = @_;
@@ -136,8 +133,8 @@ sub new_with_options {
 
   local @ARGV = @ARGV if $config{protect_argv};
 
-  if (!defined $params{invoked_as}) {
-    $params{invoked_as} = Getopt::Long::Descriptive::prog_name();
+  if (!defined $params{_meta}) {
+    $params{_meta} = CLI::Osprey::Meta->new( invoked_as => Getopt::Long::Descriptive::prog_name() );
   }
 
   my ($parsed_params, $usage) = $class->parse_options(%params);
@@ -193,7 +190,14 @@ sub new_with_options {
   }
 
   if ($subcommand_class) {
-    return $subcommand_class->new_with_options(%params, parent_command => $self, invoked_as => "$params{invoked_as} $subcommand_name");
+    return $subcommand_class->new_with_options(
+        %params,
+        _meta => CLI::Osprey::Meta->new(
+            parent     => $self,
+            command    => $subcommand_name,
+            invoked_as => $params{_meta}->invoked_as . " $subcommand_name",
+        ),
+    );
   } else {
     return $self;
   }
@@ -213,8 +217,10 @@ sub parse_options {
 
   push @getopt_options, @{$config{getopt_options}} if defined $config{getopt_options};
 
-  my $prog_name = $params{invoked_as};
-  $prog_name = Getopt::Long::Descriptive::prog_name() if !defined $prog_name;
+  my $prog_name
+    = defined $params{_meta}
+    ? $params{_meta}->invoked_as
+    : Getopt::Long::Descriptive::prog_name();
 
   my $usage_str = $config{usage_string};
   unless (defined $usage_str) {
