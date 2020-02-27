@@ -1,6 +1,6 @@
 requires 'Moo';
 requires 'Moo::Role';
-requires 'Getopt::Long::Descriptive';
+requires 'Getopt::Long::Descriptive' => '0.100';
 requires 'Module::Runtime';
 requires 'Path::Tiny';
 
