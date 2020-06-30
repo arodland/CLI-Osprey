@@ -100,8 +100,9 @@ sub import {
         method => $subobject,
         @args,
       );
-    } else {
-      use_module($subobject);
+    }
+    else {
+        use_module($subobject) unless $osprey_config->{on_demand};
     }
 
     $subcommands->{$name} = $subobject;
@@ -366,6 +367,16 @@ Default: C<"USAGE: $program_name %o">
 Provides the header of the usage message printed in response to the C<-h>
 option or an error in option processing. The format of the string is described
 in L<Getopt::Long::Descriptive/"$usage_desc">.
+
+=head2 on_demand
+
+Default: false
+
+If set to a true value, the commands' modules won't be loaded
+at compile time, but if the command is invoked. This is useful for
+minimizing compile time if the application has a lot of commands or
+the commands are on the heavy side. Note that enabling the feature
+may interfere with the ability to fatpack the application.
 
 =head1 OPTION PARAMETERS
 

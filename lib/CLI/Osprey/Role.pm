@@ -4,6 +4,7 @@ use warnings;
 use Carp 'croak';
 use Path::Tiny ();
 use Scalar::Util qw(blessed);
+use Module::Runtime 'use_module';
 
 use CLI::Osprey::Descriptive;
 
@@ -192,11 +193,15 @@ sub new_with_options {
     return $class->osprey_usage(1, $usage);
   }
 
-  if ($subcommand_class) {
-    return $subcommand_class->new_with_options(%params, parent_command => $self, invoked_as => "$params{invoked_as} $subcommand_name");
-  } else {
-    return $self;
-  }
+  return $self unless $subcommand_class;
+
+  use_module($subcommand_class);
+
+  return $subcommand_class->new_with_options(
+      %params,
+      parent_command => $self,
+      invoked_as => "$params{invoked_as} $subcommand_name"
+  );
 }
 
 sub parse_options {
