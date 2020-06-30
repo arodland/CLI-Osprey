@@ -350,7 +350,7 @@ Default: true.
 If true, command-line options override key/value pairs passed to
 C<new_with_options>. If false, the reverse is true.
 
-=head2 protect_argv
+=head2 preserve_argv
 
 Default: false.
 
