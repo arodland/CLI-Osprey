@@ -4,6 +4,7 @@ use warnings;
 use Test::More;
 use lib 't/lib';
 
+BEGIN { $::on_demand = 1; }
 use OnDemand;
 
 plan tests => 4;

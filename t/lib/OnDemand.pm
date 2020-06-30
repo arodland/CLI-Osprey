@@ -1,7 +1,7 @@
 package OnDemand;
 
 use Moo;
-use CLI::Osprey;
+use CLI::Osprey on_demand => $::on_demand;
 
 subcommand foo => 'OnDemand::Foo';
 subcommand bar => 'OnDemand::Bar';
