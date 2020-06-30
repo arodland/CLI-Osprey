@@ -82,7 +82,7 @@ sub _osprey_fix_argv {
   while (defined( my $arg = shift @ARGV )) {
     # As soon as we find a -- or a non-option word, stop processing and leave everything
     # from there onwards in ARGV as either positional args or a subcommand.
-    if ($arg eq '--' or $arg !~ /^-/) {
+    if ($arg eq '--' or $arg eq '-' or $arg !~ /^-/) {
       push @new_argv, $arg, @ARGV;
       last;
     }
@@ -93,13 +93,17 @@ sub _osprey_fix_argv {
     my ($dash, $negative, $arg_name_without_dash)
       = $arg_name_with_dash =~ /^(-+)(no\-)?(.+)$/;
 
-    my $option_name = $abbreviations->{$arg_name_without_dash};
-    if (defined $option_name) {
-      if (@$option_name == 1) {
-        $option_name = $option_name->[0];
-      } else {
-        # TODO: can't we produce a warning saying that it's ambiguous and which options conflict?
-        $option_name = undef;
+    my $option_name;
+    
+    if ($dash eq '--') {
+      my $option_name = $abbreviations->{$arg_name_without_dash};
+      if (defined $option_name) {
+        if (@$option_name == 1) {
+          $option_name = $option_name->[0];
+        } else {
+          # TODO: can't we produce a warning saying that it's ambiguous and which options conflict?
+          $option_name = undef;
+        }
       }
     }
 
