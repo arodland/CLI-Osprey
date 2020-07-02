@@ -199,7 +199,7 @@ sub new_with_options {
 
   return $self unless $subcommand_class;
 
-  use_module($subcommand_class);
+  use_module($subcommand_class) unless ref $subcommand_class;
 
   return $subcommand_class->new_with_options(
       %params,
