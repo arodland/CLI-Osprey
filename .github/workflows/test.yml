@@ -22,5 +22,9 @@ jobs:
         with:
           perl-version: ${{ matrix.perl }}
       - run: perl -V
-      - run: cpanm --installdeps .
+      - name: install deps
+        uses: perl-actions/install-with-cpm@v1.3
+        with:
+          cpanfile: "cpanfile"
+          sudo: false
       - run: prove -lv t
