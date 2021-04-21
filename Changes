@@ -16,7 +16,7 @@ Version 0.06: 2020-06-30
   * Fix a documentation error regarding preserve_argv (vague666).
 
 Version 0.05: 2020-02-27
-  * Fix "prefer_commandline" import option to work properly (thanks ufoboat).
+  * Fix "prefer_commandline" import option to work properly (thanks ufobat).
   * Use Moo::Role->is_role to check whether we're being used in a role
     (thanks djerius).
   * Add missing methods to CLI::Osprey::Descriptive::Usage
