@@ -15,7 +15,7 @@ use Moo::Role qw(); # only want class methods, not setting up a role
 use CLI::Osprey::InlineSubcommand ();
 
 my @OPTIONS_ATTRIBUTES = qw(
-  option option_name format short repeatable negatable spacer_before spacer_after doc long_doc format_doc order hidden
+  option option_name format short repeatable negatable spacer_before spacer_after doc long_doc format_doc order hidden keyvalue
 );
 
 sub import {
@@ -430,6 +430,14 @@ Default: B<false>.
 A C<hidden> option will be recognized, but not listed in automatically generated
 documentation.
 
+=head2 keyvalue
+
+Default: B<false>
+
+If both L</keyvalue> and L</repeatable> are true, the option's values
+are stored in a hash rather than an array. The value specified for the
+option should be of the form I<key>C<=>I<value>.
+
 =head2 negatable
 
 Default: B<false>.
@@ -470,7 +478,9 @@ Default: B<false>.
 Allows an option to be specified more than once. When used on a "boolean"
 option with no L</format>, each appearace of the option will increment the value
 by 1 (equivalent to C<+> in L<Getopt::Long>. When used on an option with
-arguments, produces an arrayref, one value per appearance of the option.
+arguments, it produces an arrayref if L</keyvalue> is false, or a hashref
+if L</keyvalue> is true. one entry per appearance of the option.  If L</keyvalue>
+is true, the value specified for the option should be of the form I<key>C<=>I<value>
 
 =head2 required
 
