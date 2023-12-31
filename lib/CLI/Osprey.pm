@@ -459,9 +459,9 @@ Default: None.
 Allows controlling the order that options are listed in the help text. Options
 without an order attribute are sorted by the order their C<option> statements
 are executed, if L</added_order> is true, and by alphabetical order otherwise.
-They are placed as though they had order 9999, so use small values to sort
-before automaticall-sorted options, and values of 10000 and up to sort at the
-end.
+Options without an explicit order are placed as though they had order 9999, so
+use small values to sort before automatically-sorted options, and values of
+10000 or greater to sort at the end.
 
 =head2 repeatable
 
@@ -469,7 +469,7 @@ Default: B<false>.
 
 Allows an option to be specified more than once. When used on a "boolean"
 option with no L</format>, each appearace of the option will increment the value
-by 1 (equivalent to C<+> in L<Getopt::Long>. When used on an option with
+by 1 (equivalent to C<+> in L<Getopt::Long>). When used on an option with
 arguments, produces an arrayref, one value per appearance of the option.
 
 =head2 required
