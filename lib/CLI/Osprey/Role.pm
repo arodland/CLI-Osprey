@@ -29,6 +29,10 @@ sub _osprey_prepare_options {
   my %abbreviations;
   my %fullnames;
 
+  # If options have an 'order' attr, use it; those without sort as though they were 9,999.
+  # If the order is equal (or not present on both) and the 'added_order' config flag is set,
+  # then sort according to added_order.
+  # Otherwise, sort according to option name.
   my @order = sort {
     ($options->{$a}{order} || 9999) <=> ($options->{$b}{order} || 9999)
     || ($config->{added_order} ? ($options->{$a}{added_order} <=> $options->{$b}{added_order}) : 0)
@@ -74,6 +78,15 @@ sub _osprey_prepare_options {
   return \@getopt, \%abbreviations;
 }
 
+# Process ARGV, rewriting options to be what GLD expects them to be.
+# We only want to rewrite things that GLD will be happy about, because it would be
+# bad to have GLD generate an error about something being invalid, if it isn't
+# actually something that the user typed!
+# Stuff that's done here:
+# * Rewrite abbreviations to their equivalent full names.
+# * Rewrite options that were aliased with 'option' or the default underscore-to-dash
+#   rewriting, to their canonical name (the same as the attribute name).
+# * Recognize '--foo=bar' options and replace them with '--foo bar'.
 sub _osprey_fix_argv {
   my ($options, $abbreviations) = @_;
 
@@ -95,6 +108,13 @@ sub _osprey_fix_argv {
 
     my $option_name;
     
+    # If this is a long option and abbreviations are enabled, search the abbreviation table
+    # for options that match the prefix. If the result is unique, use it. If the result is
+    # ambiguous, set $option_name undef so that eventually we will generate an "unknown option"
+    # error for it. Prefixes that exactly match an option name are excluded from the table, so
+    # that assuming that 'foo' and 'foobar' are both options, '--fo' will be ambiguous,
+    # '--foo' will be unambiguously 'foo' (*not* an error even though there are in fact two
+    # optiions that start with 'foo'), and '--foob' will be 'foobar'.
     if ($dash eq '--') {
       my $option_names = $abbreviations->{$arg_name_without_dash};
       if (defined $option_names) {
