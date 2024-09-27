@@ -145,8 +145,6 @@ sub _osprey_fix_argv {
 
 use Moo::Role;
 
-requires qw(_osprey_config _osprey_options _osprey_subcommands);
-
 has 'parent_command' => (
   is => 'ro',
 );
@@ -154,6 +152,21 @@ has 'parent_command' => (
 has 'invoked_as' => (
   is => 'ro',
 );
+
+sub _osprey_options {
+  my $class = shift;
+  return $class->maybe::next::method(@_);
+}
+
+sub _osprey_config {
+  my $class = shift;
+  return $class->maybe::next::method(@_);
+}
+
+sub _osprey_subcommands {
+  my $class = shift;
+  return $class->maybe::next::method(@_);
+}
 
 sub new_with_options {
   my ($class, %params) = @_;
