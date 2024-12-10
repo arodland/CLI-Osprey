@@ -8,7 +8,7 @@ use warnings;
 
 use Carp 'croak';
 use Module::Runtime 'use_module';
-use Scalar::Util qw(reftype);
+use Scalar::Util qw(reftype blessed);
 
 use Moo::Role qw(); # only want class methods, not setting up a role
 
@@ -84,6 +84,16 @@ sub import {
   my $option = sub {
     my ($name, %attributes) = @_;
 
+
+    if (   $attributes{inherit}
+        && !defined $attributes{default}
+        && !defined $attributes{builder}
+        && $attributes{is} ne 'lazy' )
+    {
+      $attributes{builder} = _inherited_option_builder( $target, $name );
+      $attributes{lazy} = 1;
+    }
+
     $has->($name => _non_option_attributes(%attributes));
     $options_data->{$name} = _option_attributes($name, %attributes);
     $options_data->{$name}{added_order} = ++$added_order;
@@ -147,6 +157,40 @@ sub _option_attributes {
     $ret->{$_} = $attributes{$_} if exists $attributes{$_};
   }
   return $ret;
+}
+
+sub _inherited_option_builder {
+  my ($target, $name) = @_;
+
+  sub {
+    my $parent = $_[0]->{parent_command};
+    return unless defined $parent;
+
+    my $mth = $parent->can($name);
+    if (!defined $mth) {
+      my @path;
+
+      # we can get the class of the parent (sub)command,
+      # but we want the actual command name.  For that
+      # we need $parent->parent->_osprey_subcommands.
+      while (defined $parent) {
+        unshift @path, { reverse $parent->_osprey_subcommands }->{$target};
+        $target = blessed $parent;
+        last if !defined $parent->{parent_command};
+        $parent = $parent->{parent_command};
+      }
+      unshift @path, $parent->invoked_as;
+
+      my $subcommand = pop @path;
+      my $command    = join(' / ', @path);
+
+      require Carp;
+      Carp::croak(
+          qq[parent '$command' of '$subcommand' does not have a '--$name' option\n],
+      );
+    }
+    $mth->($parent);
+  }
 }
 
 1;
@@ -429,6 +473,17 @@ Default: B<false>.
 
 A C<hidden> option will be recognized, but not listed in automatically generated
 documentation.
+
+=head2 inherit
+
+Default: B<false>.
+
+An inherited option's default value is the value of the parent
+command's or sub-command's option of the same name.  This attribute is
+ignored if the C<default> or C<builder> attributes are set (either
+explicitly or implicitly).  If the option has not been set and the
+parent command or sub-command does not have a similarly named option,
+an exception will be thrown when the option's value is first accessed.
 
 =head2 negatable
 
