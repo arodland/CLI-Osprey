@@ -2,7 +2,9 @@
 
 Version 0.08: 2020-07-12
   * Fix the mapping of underscores in attribute names to dashes in option
-    names (sivoais again).
+    names (sivoais again). Although this makes things work as documented, and
+    as they were always intended to work, it may be a breaking change if you
+    were relying on old incorrect behavior.
 
 Version 0.07: 2020-07-02
   * Fix inline subcommands, broken by 0.06 (sivoais).
