@@ -14,11 +14,16 @@ use CLI::Osprey::Descriptive;
 
 sub _osprey_option_to_getopt {
   my ($name, %attributes) = @_;
-  my $getopt = join('|', grep defined, ($name, $attributes{short}));
+
+  # Use custom option name if provided, otherwise use attribute name
+  my $option_name = $attributes{option} || $name;
+
+  my $getopt = join('|', grep defined, ($option_name, $attributes{short}));
   $getopt .= '+' if $attributes{repeatable} && !defined $attributes{format};
   $getopt .= '!' if $attributes{negatable};
   $getopt .= '=' . $attributes{format} if defined $attributes{format};
   $getopt .= '@' if $attributes{repeatable} && defined $attributes{format};
+
   return $getopt;
 }
 
