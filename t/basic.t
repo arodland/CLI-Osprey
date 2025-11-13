@@ -97,6 +97,16 @@ subtest 'subcommand' => sub {
                                  "excitement level adds exclamation marks");
             };
         };
+
+        subtest "repeat_count option" => sub {
+            subtest "functional: -r short option" => sub {
+                my ($stdout, $stderr) = $run_yell_command->(qw(-r 3));
+                my @lines = split /\n/, $stdout;
+                is ( scalar(@lines), 3, "repeated 3 times" );
+                is ( $lines[0], "HELLO WORLD!", "first line correct" );
+                is ( $stderr, '', "empty stderr" );
+            };
+        };
     };
 
     subtest "inline subcommand" => sub {

@@ -20,20 +20,31 @@ option output_format => (
     default => 'text',
 );
 
+# Another example with short option matching first letter
+option repeat_count => (
+    is => 'ro',
+    format => 'i',
+    short => 'r',  # Matches first letter of long option name
+    doc => 'Number of times to repeat the yell',
+    default => 1,
+);
+
 sub run {
     my ($self) = @_;
     my $message = uc $self->parent_command->message . "!" x $self->excitement_level;
 
-    my $output;
-    if ($self->output_format eq 'json') {
-        $output = qq({"yell": "$message"});
-    } elsif ($self->output_format eq 'xml') {
-        $output = qq(<yell>$message</yell>);
-    } else {
-        $output = $message;
-    }
+    for (1 .. $self->repeat_count) {
+        my $output;
+        if ($self->output_format eq 'json') {
+            $output = qq({"yell": "$message"});
+        } elsif ($self->output_format eq 'xml') {
+            $output = qq(<yell>$message</yell>);
+        } else {
+            $output = $message;
+        }
 
-    print "$output\n";
+        print "$output\n";
+    }
 }
 
 
