@@ -9,22 +9,22 @@ use MyTest::Class::Basic;
 subtest 'command' => sub {
 
     subtest "default options" => sub {
-	local @ARGV = ();
-	my ( $stdout, $stderr, @result ) =
-	   capture { MyTest::Class::Basic->new_with_options->run };
+        local @ARGV = ();
+        my ( $stdout, $stderr, @result ) =
+           capture { MyTest::Class::Basic->new_with_options->run };
 
-	is ( $stdout, "Hello world!\n", "message sent to stdout" );
-	is ( $stderr, '', "empty stderr" );
+        is ( $stdout, "Hello world!\n", "message sent to stdout" );
+        is ( $stderr, '', "empty stderr" );
 
     };
 
     subtest "command line options" => sub {
-	local @ARGV = ( '--message', 'Hello Cleveland!' );
-	my ( $stdout, $stderr, @result ) =
-	   capture { MyTest::Class::Basic->new_with_options->run };
+        local @ARGV = ( '--message', 'Hello Cleveland!' );
+        my ( $stdout, $stderr, @result ) =
+           capture { MyTest::Class::Basic->new_with_options->run };
 
-	is ( $stdout, "Hello Cleveland!\n", "message sent to stdout" );
-	is ( $stderr, '', "empty stderr" );
+        is ( $stdout, "Hello Cleveland!\n", "message sent to stdout" );
+        is ( $stderr, '', "empty stderr" );
 
     };
 
