@@ -14,11 +14,16 @@ use CLI::Osprey::Descriptive;
 
 sub _osprey_option_to_getopt {
   my ($name, %attributes) = @_;
-  my $getopt = join('|', grep defined, ($name, $attributes{short}));
+
+  # Use custom option name if provided, otherwise use attribute name
+  my $option_name = $attributes{option} || $name;
+
+  my $getopt = join('|', grep defined, ($option_name, $attributes{short}));
   $getopt .= '+' if $attributes{repeatable} && !defined $attributes{format};
   $getopt .= '!' if $attributes{negatable};
   $getopt .= '=' . $attributes{format} if defined $attributes{format};
   $getopt .= '@' if $attributes{repeatable} && defined $attributes{format};
+
   return $getopt;
 }
 
@@ -70,7 +75,7 @@ sub _osprey_prepare_options {
     if ($config->{abbreviate}) {
       for my $len (1 .. length($name) - 1) {
         my $abbreviated = substr $name, 0, $len;
-        push @{ $abbreviations{$abbreviated} }, $name unless exists $fullnames{$abbreviated};
+        push @{ $abbreviations{$abbreviated} }, $option unless exists $fullnames{$abbreviated};
       }
     }
   }
@@ -127,9 +132,12 @@ sub _osprey_fix_argv {
       }
     }
 
+    # $option_name is the attribute name (underscored) from abbreviations table
+    # We need to get the actual CLI option name for the rewritten ARGV
     my $arg_name = ($dash || '') . ($negative || '');
     if (defined $option_name) {
-      $arg_name .= $option_name;
+      # Use the custom option name from the options hash if possible
+      $arg_name .= $options->{$option_name}{option} || $option_name;
     } else {
       $arg_name .= $arg_name_without_dash;
     }
@@ -274,7 +282,15 @@ sub parse_options {
   my %parsed_params;
 
   for my $name (keys %options, qw(h help man)) {
-    my $val = $opt->$name();
+    # Getopt::Long converts hyphens to underscores; Getopt::Long::Descriptive uses these as method names
+    # For custom option names, we need to retrieve using the option name, not attribute name
+    my $method_name = $name;
+    if (exists $options{$name} && exists $options{$name}{option}) {
+      $method_name = $options{$name}{option};
+      $method_name =~ tr/-/_/;  # Convert hyphens to underscores to match Getopt::Long's conversion
+    }
+
+    my $val = $opt->$method_name();
     $parsed_params{$name} = $val if defined $val;
   }
 
