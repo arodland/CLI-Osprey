@@ -32,6 +32,19 @@ subtest 'command' => sub {
 
 subtest 'subcommand' => sub {
     subtest 'yell class subcommand' => sub {
+        require CLI::Osprey::Role;
+        require MyTest::Class::Basic::Yell;
+        my %options = MyTest::Class::Basic::Yell->_osprey_options();
+
+        # Helper function: get getopt string for an option
+        my $get_getopt_string = sub {
+            my ($option_name) = @_;
+            my %attrs = %{ $options{$option_name} };
+            my $getopt = CLI::Osprey::Role::_osprey_option_to_getopt($option_name, %attrs);
+            note("$option_name getopt string: $getopt");
+            return $getopt;
+        };
+
         # Helper function: run yell command and capture output
         my $run_yell_command = sub {
             my (@args) = @_;
@@ -55,6 +68,12 @@ subtest 'subcommand' => sub {
         };
 
         subtest "excitement_level option" => sub {
+            subtest "internal: generates hyphenated getopt string" => sub {
+                my $getopt = $get_getopt_string->('excitement_level');
+                like($getopt, qr{\Qexcitement-level\E}, "generates hyphenated getopt string");
+                unlike($getopt, qr{\Qexcitement_level\E}, "does not generate underscored getopt string");
+            };
+
             subtest "functional: --excitement-level" => sub {
                 $test_yell_command->([qw(--excitement-level 2)], qr{^\QHELLO WORLD!!!\E\n$},
                                  "excitement level adds exclamation marks");
