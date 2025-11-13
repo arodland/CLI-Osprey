@@ -132,9 +132,12 @@ sub _osprey_fix_argv {
       }
     }
 
+    # $option_name is the attribute name (underscored) from abbreviations table
+    # We need to get the actual CLI option name for the rewritten ARGV
     my $arg_name = ($dash || '') . ($negative || '');
     if (defined $option_name) {
-      $arg_name .= $option_name;
+      # Use the custom option name from the options hash if possible
+      $arg_name .= $options->{$option_name}{option} || $option_name;
     } else {
       $arg_name .= $arg_name_without_dash;
     }
