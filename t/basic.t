@@ -146,6 +146,18 @@ subtest 'subcommand' => sub {
                 is($stderr, '', "empty stderr");
             };
         };
+
+        subtest "abbreviate feature" => sub {
+            subtest "--out abbreviates --output-format" => sub {
+                $test_yell_command->([qw(--out xml)], qr{\Q<yell>HELLO WORLD!</yell>\E},
+                                 "abbreviated --out works for --output-format");
+            };
+
+            subtest "--output-form abbreviates --output-format" => sub {
+                $test_yell_command->([qw(--output-form xml)], qr{\Q<yell>HELLO WORLD!</yell>\E},
+                                 "abbreviated --output-form works for --output-format");
+            };
+        };
     };
 
     subtest "inline subcommand" => sub {
