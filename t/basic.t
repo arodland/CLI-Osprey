@@ -67,6 +67,24 @@ subtest 'subcommand' => sub {
             $test_yell_command->([], qr{^\QHELLO WORLD!\E\n$}, "message sent to stdout");
         };
 
+        subtest "output_format option" => sub {
+            subtest "internal: generates hyphenated getopt string" => sub {
+                my $getopt = $get_getopt_string->('output_format');
+                like($getopt, qr{\Qoutput-format\E}, "generates hyphenated getopt string");
+                unlike($getopt, qr{\Qoutput_format\E}, "does not generate underscored getopt string");
+            };
+
+            subtest "functional: --output-format long option" => sub {
+                $test_yell_command->([qw(--output-format xml)], qr{\Q<yell>HELLO WORLD!</yell>\E},
+                                 "XML format output");
+            };
+
+            subtest "functional: -f short option" => sub {
+                $test_yell_command->([qw(-f json)], qr{\Q"yell": "HELLO WORLD!"\E},
+                                 "JSON format output");
+            };
+        };
+
         subtest "excitement_level option" => sub {
             subtest "internal: generates hyphenated getopt string" => sub {
                 my $getopt = $get_getopt_string->('excitement_level');

@@ -10,9 +10,30 @@ option excitement_level => (
     default => 0,
 );
 
+# Example of underscored attribute name with short option that doesn't match first letter
+# Tests the fix where option name becomes 'output-format' (hyphenated)
+option output_format => (
+    is => 'ro',
+    format => 's',
+    short => 'f',  # Note: 'f' not 'o' - doesn't match first letter
+    doc => 'Output format (text, json, xml)',
+    default => 'text',
+);
+
 sub run {
     my ($self) = @_;
-    print uc $self->parent_command->message, "!" x $self->excitement_level, "\n";
+    my $message = uc $self->parent_command->message . "!" x $self->excitement_level;
+
+    my $output;
+    if ($self->output_format eq 'json') {
+        $output = qq({"yell": "$message"});
+    } elsif ($self->output_format eq 'xml') {
+        $output = qq(<yell>$message</yell>);
+    } else {
+        $output = $message;
+    }
+
+    print "$output\n";
 }
 
 
