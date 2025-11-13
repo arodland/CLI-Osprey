@@ -126,6 +126,26 @@ subtest 'subcommand' => sub {
                                  "custom suffix added via --add-suffix");
             };
         };
+
+        subtest "add_tag option (negatable)" => sub {
+            subtest "internal: generates hyphenated negatable getopt string" => sub {
+                my $getopt = $get_getopt_string->('add_tag');
+                like($getopt, qr{\Qadd-tag!\E}, "generates hyphenated negatable getopt string");
+                unlike($getopt, qr{\Qadd_tag\E}, "does not generate underscored getopt string");
+            };
+
+            subtest "functional: --add-tag" => sub {
+                $test_yell_command->([qw(--add-tag)], qr{\Q[TAG] HELLO WORLD!\E},
+                                 "tag added via --add-tag");
+            };
+
+            subtest "functional: --no-add-tag" => sub {
+                my ($stdout, $stderr) = $run_yell_command->(qw(--no-add-tag));
+                unlike($stdout, qr{\Q[TAG]\E}, "no tag when disabled via --no-add-tag");
+                like($stdout, qr{^\QHELLO WORLD!\E$}, "plain output");
+                is($stderr, '', "empty stderr");
+            };
+        };
     };
 
     subtest "inline subcommand" => sub {

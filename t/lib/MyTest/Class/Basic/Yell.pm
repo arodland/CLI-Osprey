@@ -39,6 +39,14 @@ option custom_suffix => (
     default => '',
 );
 
+# Negatable boolean option - no format!
+option add_tag => (
+    is => 'ro',
+    negatable => 1,
+    doc => 'Add tag to output',
+    default => 0,
+);
+
 sub run {
     my ($self) = @_;
     my $message = uc $self->parent_command->message . "!" x $self->excitement_level;
@@ -56,7 +64,11 @@ sub run {
             $output = $message;
         }
 
-        print "$output\n";
+        if ($self->add_tag) {
+            print "[TAG] $output\n";
+        } else {
+            print "$output\n";
+        }
     }
 }
 
