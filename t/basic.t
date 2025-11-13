@@ -158,6 +158,28 @@ subtest 'subcommand' => sub {
                                  "abbreviated --output-form works for --output-format");
             };
         };
+
+        subtest "combinations" => sub {
+            subtest "minimum failing case: short + hyphenated long" => sub {
+                $test_yell_command->([qw(-f xml --excitement-level 2)],
+                                 qr{\Q<yell>HELLO WORLD!!!</yell>\E},
+                                 "XML format via -f with excitement-level 2");
+            };
+
+            subtest "multiple hyphenated long options" => sub {
+                my ($stdout, $stderr) = $run_yell_command->(qw(--excitement-level 2 --output-format xml --repeat-count 2));
+                my @lines = split /\n/, $stdout;
+                is ( scalar(@lines), 2, "repeated 2 times" );
+                like ( $lines[0], qr{\Q<yell>HELLO WORLD!!!</yell>\E}, "XML with excitement-level 2" );
+                is ( $stderr, '', "empty stderr" );
+            };
+
+            subtest "custom option + other options" => sub {
+                $test_yell_command->([qw(-f xml --add-suffix), '[ZAP]', qw(--excitement-level 1)],
+                                 qr{\Q<yell>HELLO WORLD!![ZAP]</yell>\E},
+                                 "custom suffix combined with format and excitement");
+            };
+        };
     };
 
     subtest "inline subcommand" => sub {
