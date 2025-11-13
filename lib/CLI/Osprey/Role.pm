@@ -282,7 +282,15 @@ sub parse_options {
   my %parsed_params;
 
   for my $name (keys %options, qw(h help man)) {
-    my $val = $opt->$name();
+    # Getopt::Long converts hyphens to underscores; Getopt::Long::Descriptive uses these as method names
+    # For custom option names, we need to retrieve using the option name, not attribute name
+    my $method_name = $name;
+    if (exists $options{$name} && exists $options{$name}{option}) {
+      $method_name = $options{$name}{option};
+      $method_name =~ tr/-/_/;  # Convert hyphens to underscores to match Getopt::Long's conversion
+    }
+
+    my $val = $opt->$method_name();
     $parsed_params{$name} = $val if defined $val;
   }
 
