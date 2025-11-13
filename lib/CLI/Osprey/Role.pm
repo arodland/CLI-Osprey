@@ -75,7 +75,7 @@ sub _osprey_prepare_options {
     if ($config->{abbreviate}) {
       for my $len (1 .. length($name) - 1) {
         my $abbreviated = substr $name, 0, $len;
-        push @{ $abbreviations{$abbreviated} }, $name unless exists $fullnames{$abbreviated};
+        push @{ $abbreviations{$abbreviated} }, $option unless exists $fullnames{$abbreviated};
       }
     }
   }
