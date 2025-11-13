@@ -29,9 +29,22 @@ option repeat_count => (
     default => 1,
 );
 
+# Test with completely different option name from attribute
+option custom_suffix => (
+    is => 'ro',
+    format => 's',
+    option => 'add-suffix',  # Completely different from attribute name!
+    short => 's',
+    doc => 'Custom suffix to add to output',
+    default => '',
+);
+
 sub run {
     my ($self) = @_;
     my $message = uc $self->parent_command->message . "!" x $self->excitement_level;
+
+    # Add custom suffix if provided
+    $message .= $self->custom_suffix if $self->custom_suffix;
 
     for (1 .. $self->repeat_count) {
         my $output;

@@ -107,6 +107,25 @@ subtest 'subcommand' => sub {
                 is ( $stderr, '', "empty stderr" );
             };
         };
+
+        subtest "custom_suffix option (custom option name)" => sub {
+            subtest "internal: generates custom option name getopt string" => sub {
+                my $getopt = $get_getopt_string->('custom_suffix');
+                like($getopt, qr{\Qadd-suffix\E}, "generates custom 'add-suffix' getopt string");
+                unlike($getopt, qr{custom[_-]suffix}, "does not generate attribute name in getopt string");
+                is($getopt, 'add-suffix|s=s', "complete getopt string uses custom option name");
+            };
+
+            subtest "functional: -s short option" => sub {
+                $test_yell_command->([qw(-s), '[BOOM]'], qr{\QHELLO WORLD![BOOM]\E},
+                                 "custom suffix added via -s");
+            };
+
+            subtest "functional: --add-suffix long option" => sub {
+                $test_yell_command->([qw(--add-suffix), '[POW]'], qr{\QHELLO WORLD![POW]\E},
+                                 "custom suffix added via --add-suffix");
+            };
+        };
     };
 
     subtest "inline subcommand" => sub {
